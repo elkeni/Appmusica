@@ -1,19 +1,24 @@
-// Configuración e inicialización de Firebase.
-// Reemplaza los valores de firebaseConfig con la configuración de tu proyecto.
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore"; // <--- Importante: Importar Firestore
+import { getAnalytics } from "firebase/analytics";
 
+// Pega aquí tu configuración real de Firebase
 const firebaseConfig = {
-  apiKey: 'TU_API_KEY',
-  authDomain: 'TU_AUTH_DOMAIN',
-  projectId: 'TU_PROJECT_ID',
-  storageBucket: 'TU_STORAGE_BUCKET',
-  messagingSenderId: 'TU_MESSAGING_SENDER_ID',
-  appId: 'TU_APP_ID',
+  apiKey: "AIzaSyBist-khRNjofRcliaN3W-b9FdiIDv2fvg",
+  authDomain: "appmusica-5c872.firebaseapp.com",
+  projectId: "appmusica-5c872",
+  storageBucket: "appmusica-5c872.firebasestorage.app",
+  messagingSenderId: "134336615838",
+  appId: "1:134336615838:web:826064c59849c9c0d9b28f",
+  measurementId: "G-KT5M6DYJ39"
 };
 
-// Inicializa Firebase y exporta la instancia de Firestore.
+// Inicializar la App
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const analytics = getAnalytics(app);
 
+// ⚠️ ESTA ES LA LÍNEA QUE TE FALTABA:
+const db = getFirestore(app); 
+
+// Ahora sí podemos exportar db porque ya existe
 export { db };
