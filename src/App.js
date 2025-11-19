@@ -96,6 +96,26 @@ function SongCard({ item, onPlay, onFavorite, onAddPlaylist }) {
   );
 }
 
+// Componente de Botón de Navegación
+function NavButton({ icon, label, active, onClick, badge }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+        active
+          ? 'bg-gradient-to-r from-pink-500/20 to-violet-600/20 text-white border border-pink-500/30'
+          : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+      }`}
+    >
+      {icon}
+      <span className="font-medium flex-1 text-left">{label}</span>
+      {badge > 0 && (
+        <span className="bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">{badge}</span>
+      )}
+    </button>
+  );
+}
+
 export default function App() {
   // Estado de usuario autenticado
   const [user, setUser] = useState(auth.currentUser);
@@ -894,111 +914,4 @@ export default function App() {
       )}
     </div>
   );
-
-  // --- COMPONENTE DE BOTÓN DE NAVEGACIÓN ---
-  function NavButton({ icon, label, active, onClick, badge }) {
-    return (
-      <button
-        onClick={onClick}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-          active
-            ? 'bg-gradient-to-r from-pink-500/20 to-violet-600/20 text-white border border-pink-500/30'
-            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-        }`}
-      >
-        {icon}
-        <span className="font-medium flex-1 text-left">{label}</span>
-        {badge > 0 && (
-          <span className="bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">{badge}</span>
-        )}
-      </button>
-    );
-  }
-  // --- COMPONENTE DE TARJETA UNIFICADO ---
-  // Este componente renderiza únicamente canciones de YouTube
-  const Card = ({ item }) => {
-    // Extraemos la información de la canción de YouTube
-    const videoId = item?.id?.videoId || item?.videoId;
-    const title = item?.snippet?.title || item?.title || 'Sin título';
-    const subtitle = item?.snippet?.channelTitle || item?.artist || '';
-    const image = item?.snippet?.thumbnails?.high?.url || item?.image || '';
-    const isCurrent = currentTrack?.id === videoId;
-    const isFav = favorites.some((f) => {
-      const fid = f?.id?.videoId || f?.videoId;
-      return fid === videoId;
-    });
-    const isInPlaylist = playlist.some((p) => {
-      const pid = p?.id?.videoId || p?.videoId;
-      return pid === videoId;
-    });
-
-    // No renderizar elementos que no tengan un videoId válido (por ejemplo, antiguas radios)
-    if (!videoId) return null;
-
-    return (
-      <div
-        onClick={() => playItem(item)}
-        className={`group relative bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-pink-500/50 rounded-xl p-3 transition-all cursor-pointer flex items-center gap-4 overflow-hidden ${
-          isCurrent ? 'ring-1 ring-pink-500 bg-slate-800' : ''
-        }`}
-      >
-        <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-900 flex items-center justify-center shadow-lg">
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          ) : null}
-          {/* Fallback Icono de YouTube */}
-          <div className="absolute inset-0 flex items-center justify-center z-[-1]">
-            <Youtube size={24} className="text-slate-600" />
-          </div>
-          <div
-            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
-              isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}
-          >
-            {isCurrent && isPlaying ? (
-              <Pause className="text-white fill-white" size={24} />
-            ) : (
-              <Play className="text-white fill-white" size={24} />
-            )}
-          </div>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-white truncate text-sm leading-tight mb-1">{title}</h3>
-          <p className="text-xs text-slate-400 truncate capitalize">{subtitle}</p>
-        </div>
-        {/* Botón de favoritos */}
-        <button
-          onClick={(e) => toggleFavorite(e, item)}
-          className={`p-2 rounded-full hover:bg-slate-700 transition-colors ${
-            isFav ? 'text-pink-500' : 'text-slate-600 hover:text-pink-400'
-          }`}
-        >
-          <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
-        </button>
-        {/* Botón de playlist */}
-        <button
-          onClick={(e) => togglePlaylist(e, item)}
-          className={`p-2 rounded-full hover:bg-slate-700 transition-colors ${
-            isInPlaylist ? 'text-green-500' : 'text-slate-600 hover:text-green-400'
-          }`}
-        >
-          <Plus size={18} />
-        </button>
-        {isCurrent && isPlaying && (
-          <div className="absolute right-2 top-2 flex gap-0.5 items-end h-3">
-            <span className="w-1 bg-pink-500 animate-pulse h-full"></span>
-            <span className="w-1 bg-violet-500 animate-pulse h-2/3 delay-75"></span>
-            <span className="w-1 bg-pink-500 animate-pulse h-full delay-150"></span>
-          </div>
-        )}
-      </div>
-    );
-  };
 }
