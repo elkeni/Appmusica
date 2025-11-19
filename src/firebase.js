@@ -4,10 +4,10 @@ import { getAnalytics } from "firebase/analytics";
 
 // Pega aquí tu configuración real de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBist-khRNjofRcliaN3W-b9FdiIDv2fvg",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "appmusica-5c872.firebaseapp.com",
   projectId: "appmusica-5c872",
-  storageBucket: "appmusica-5c872.firebasestorage.app",
+  storageBucket: "appmusica-5c872.appspot.com",
   messagingSenderId: "134336615838",
   appId: "1:134336615838:web:826064c59849c9c0d9b28f",
   measurementId: "G-KT5M6DYJ39"

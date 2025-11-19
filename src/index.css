@@ -2,7 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* src/App.css */
-.App {
-  text-align: center;
+/* --- ESTILOS BASE GLOBALES --- */
+@layer base {
+  /* Fondo oscuro y texto blanco por defecto para toda la app */
+  body {
+    @apply bg-gray-900 text-white font-sans antialiased selection:bg-purple-500 selection:text-white;
+    /* Esto asegura que el scroll sea suave */
+    scroll-behavior: smooth;
+  }
+
+  /* Títulos */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+/* --- SCROLLBARS PERSONALIZADOS (Estilo Spotify/Dark) --- */
+/* Funciona en Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 8px; /* Ancho vertical */
+  height: 8px; /* Alto horizontal */
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900; /* Color del fondo del riel */
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-700 rounded-full border-2 border-gray-900; /* La barra en sí */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500; /* Color al pasar el mouse */
+}
+
+/* --- UTILIDADES PERSONALIZADAS --- */
+@layer utilities {
+  /* Clase para ocultar la barra de scroll pero permitir deslizar */
+  /* Útil para carruseles de canciones o artistas */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE y Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari y Opera */
+  }
+
+  /* Efecto de brillo sutil */
+  .glass-effect {
+    @apply bg-gray-800/50 backdrop-blur-md border border-white/10;
+  }
 }
