@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore"; // <--- Importante: Importar Firestore
+
 import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
 
 // Pega aquí tu configuración real de Firebase
 const firebaseConfig = {
@@ -17,8 +19,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
+const auth = getAuth(app); // Inicializa Firebase Authentication
+
+
 // ⚠️ ESTA ES LA LÍNEA QUE TE FALTABA:
 const db = getFirestore(app); 
 
-// Ahora sí podemos exportar db porque ya existe
-export { db };
+// Ahora sí podemos exportar db y auth porque ya existen
+export { db, auth };
