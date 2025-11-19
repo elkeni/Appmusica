@@ -48,16 +48,16 @@ function SongCard({ item, onPlay, onFavorite, onAddPlaylist }) {
           style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover'}}
           className="group-hover:scale-110 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center gap-2 md:gap-3 opacity-0 group-hover:opacity-100">
           {onPlay && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onPlay(item);
               }}
-              className="bg-green-500 hover:bg-green-600 rounded-full p-3 transition-all duration-200 transform hover:scale-110"
+              className="bg-green-500 hover:bg-green-600 rounded-full p-2 md:p-3 transition-all duration-200 transform hover:scale-110"
             >
-              <Play size={20} className="fill-white text-white ml-0.5" />
+              <Play size={16} className="fill-white text-white ml-0.5 md:w-5 md:h-5" />
             </button>
           )}
           {onFavorite && (
@@ -66,9 +66,9 @@ function SongCard({ item, onPlay, onFavorite, onAddPlaylist }) {
                 e.stopPropagation();
                 onFavorite(e, item);
               }}
-              className="bg-pink-500 hover:bg-pink-600 rounded-full p-3 transition-all duration-200 transform hover:scale-110"
+              className="bg-pink-500 hover:bg-pink-600 rounded-full p-2 md:p-3 transition-all duration-200 transform hover:scale-110"
             >
-              <Heart size={20} className="text-white" />
+              <Heart size={16} className="text-white md:w-5 md:h-5" />
             </button>
           )}
           {onAddPlaylist && (
@@ -77,15 +77,15 @@ function SongCard({ item, onPlay, onFavorite, onAddPlaylist }) {
                 e.stopPropagation();
                 onAddPlaylist(e, item);
               }}
-              className="bg-blue-500 hover:bg-blue-600 rounded-full p-3 transition-all duration-200 transform hover:scale-110"
+              className="bg-blue-500 hover:bg-blue-600 rounded-full p-2 md:p-3 transition-all duration-200 transform hover:scale-110"
             >
-              <Plus size={20} className="text-white" />
+              <Plus size={16} className="text-white md:w-5 md:h-5" />
             </button>
           )}
         </div>
       </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-white text-sm truncate group-hover:text-green-400 transition-colors">
+      <div className="p-2 md:p-4">
+        <h3 className="font-semibold text-white text-xs md:text-sm truncate group-hover:text-green-400 transition-colors">
           {getTitle()}
         </h3>
         <p className="text-slate-400 text-xs truncate">
@@ -460,9 +460,9 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-900 text-white overflow-hidden">
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-black border-r border-slate-800 flex flex-col overflow-y-auto">
+    <div className="flex flex-col md:flex-row h-screen bg-slate-900 text-white overflow-hidden">
+      {/* SIDEBAR - DESKTOP */}
+      <aside className="hidden md:flex md:w-64 bg-black border-r border-slate-800 flex-col overflow-y-auto">
         {/* Logo */}
         <div className="p-6 flex items-center gap-3 border-b border-slate-800">
           <div className="w-10 h-10 bg-gradient-to-tr from-pink-500 to-violet-600 rounded-lg flex items-center justify-center">
@@ -524,18 +524,18 @@ export default function App() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden w-full md:w-auto">
         {/* TOP BAR */}
-        <header className="bg-slate-800/50 backdrop-blur-md border-b border-slate-700 px-8 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-1">
+        <header className="bg-slate-800/50 backdrop-blur-md border-b border-slate-700 px-4 md:px-8 py-3 md:py-4 flex items-center justify-between gap-2 md:gap-0">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg md:text-2xl font-bold text-white mb-0 md:mb-1 truncate">
               {view === 'discover' && '🎵 Descubrir'}
-              {view === 'search' && '🔍 Resultados de búsqueda'}
+              {view === 'search' && '🔍 Busca'}
               {view === 'playlist-detail' && `📋 ${selectedPlaylist}`}
-              {view === 'favorites' && '❤️ Mis Favoritos'}
+              {view === 'favorites' && '❤️ Favoritos'}
               {view === 'playlist' && '📋 Mi Playlist'}
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-xs md:text-sm text-slate-400 hidden md:block">
               {view === 'discover' && `${discoverResults.length} canciones populares`}
               {view === 'search' && `${searchResults.length} resultados encontrados`}
               {view === 'playlist-detail' && `${selectedPlaylistSongs.length} canciones`}
@@ -543,26 +543,88 @@ export default function App() {
               {view === 'playlist' && `${playlist.filter((item) => !item.stationuuid).length} canciones en playlist`}
             </p>
           </div>
+          {/* Botón menú móvil */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="md:hidden p-2 hover:bg-slate-700 rounded-lg transition-colors"
+          >
+            {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </header>
 
         {/* SEARCH BAR (en vistas discover y search) */}
         {(view === 'discover' || view === 'search') && (
-          <div className="bg-slate-800 px-8 py-4 border-b border-slate-700">
-            <form onSubmit={handleSearch} className="relative max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
+          <div className="bg-slate-800 px-4 md:px-8 py-3 md:py-4 border-b border-slate-700">
+            <form onSubmit={handleSearch} className="relative w-full md:max-w-2xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
                 type="text"
-                placeholder="Busca artistas, canciones, playlists..."
+                placeholder="Busca canciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-full focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 text-white placeholder-slate-400 transition-all"
+                className="w-full pl-12 pr-4 py-2 md:py-3 bg-slate-700 border border-slate-600 rounded-full focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 text-white placeholder-slate-400 transition-all text-sm md:text-base"
               />
             </form>
           </div>
         )}
 
+        {/* MOBILE MENU */}
+        {showMobileMenu && (
+          <nav className="md:hidden bg-black border-b border-slate-800 px-4 py-4 space-y-2">
+            <NavButton
+              icon={<Music size={20} />}
+              label="Descubrir"
+              active={view === 'discover'}
+              onClick={() => {
+                setView('discover');
+                setSearchResults([]);
+                setSearchTerm('');
+                setShowMobileMenu(false);
+              }}
+            />
+            <NavButton
+              icon={<Search size={20} />}
+              label="Buscar"
+              active={view === 'search'}
+              onClick={() => {
+                setView('search');
+                setShowMobileMenu(false);
+              }}
+            />
+            <NavButton
+              icon={<Heart size={20} />}
+              label="Favoritos"
+              active={view === 'favorites'}
+              onClick={() => {
+                setView('favorites');
+                setShowMobileMenu(false);
+              }}
+              badge={favorites.filter((item) => !item.stationuuid).length}
+            />
+            <NavButton
+              icon={<ListMusic size={20} />}
+              label="Mi Playlist"
+              active={view === 'playlist'}
+              onClick={() => {
+                setView('playlist');
+                setShowMobileMenu(false);
+              }}
+              badge={playlist.filter((item) => !item.stationuuid).length}
+            />
+            <button
+              onClick={() => {
+                handleLogout();
+                setShowMobileMenu(false);
+              }}
+              className="w-full px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-sm font-medium transition-all mt-4"
+            >
+              Cerrar sesión
+            </button>
+          </nav>
+        )}
+
         {/* CONTENT AREA */}
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {loading && (
             <div className="flex justify-center items-center h-full">
               <div className="flex flex-col items-center gap-4">
@@ -585,24 +647,24 @@ export default function App() {
               {view === 'discover' && (
                 <>
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-white mb-4">📋 Playlists Para Ti</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-4">📋 Playlists Para Ti</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 mb-8">
                       {preCreatedPlaylists.map((playlist) => (
                         <div
                           key={playlist.id}
                           onClick={() => handlePlaylistClick(playlist.id, playlist.name)}
-                          className={`${playlist.bgClass} rounded-lg p-6 cursor-pointer hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl`}
+                          className={`${playlist.bgClass} rounded-lg p-3 md:p-6 cursor-pointer hover:scale-105 transform transition-all duration-200 shadow-lg hover:shadow-xl`}
                         >
-                          <div className="text-4xl mb-4">{playlist.name.split(' ')[0]}</div>
-                          <h3 className="text-xl font-bold text-white mb-2">{playlist.name}</h3>
-                          <p className="text-white/80 text-sm">{playlist.description}</p>
+                          <div className="text-2xl md:text-4xl mb-2 md:mb-4">{playlist.name.split(' ')[0]}</div>
+                          <h3 className="text-sm md:text-xl font-bold text-white mb-1 md:mb-2 line-clamp-2">{playlist.name}</h3>
+                          <p className="text-white/80 text-xs md:text-sm hidden sm:block">{playlist.description}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-white mb-4">🔥 Populares Ahora</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-4">🔥 Populares Ahora</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                       {discoverResults.map((item) => (
                         <SongCard key={item.id.videoId} item={item} onPlay={playItem} onFavorite={toggleFavorite} onAddPlaylist={togglePlaylist} />
                       ))}
@@ -613,7 +675,7 @@ export default function App() {
 
               {/* Vista Búsqueda - Muestra resultados */}
               {view === 'search' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                   {searchResults.map((item) => (
                     <SongCard key={item.id.videoId} item={item} onPlay={playItem} onFavorite={toggleFavorite} onAddPlaylist={togglePlaylist} />
                   ))}
@@ -633,7 +695,7 @@ export default function App() {
                   >
                     <span>←</span> Volver
                   </button>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                     {selectedPlaylistSongs.map((item) => (
                       <SongCard key={item.id.videoId} item={item} onPlay={playItem} onFavorite={toggleFavorite} onAddPlaylist={togglePlaylist} />
                     ))}
@@ -643,7 +705,7 @@ export default function App() {
 
               {/* Vista Favoritos */}
               {view === 'favorites' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                   {favorites
                     .filter((item) => !item.stationuuid)
                     .map((item, idx) => (
@@ -654,7 +716,7 @@ export default function App() {
 
               {/* Vista Playlist */}
               {view === 'playlist' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
                   {playlist
                     .filter((item) => !item.stationuuid)
                     .map((item, idx) => (
@@ -668,9 +730,9 @@ export default function App() {
           {/* Estados vacíos */}
           {!loading && view === 'search' && searchResults.length === 0 && searchTerm && (
             <div className="text-center py-20 text-slate-500">
-              <Search size={64} className="mx-auto mb-4 opacity-20" />
-              <p className="text-lg font-semibold mb-2">No se encontraron resultados</p>
-              <p className="text-sm">Intenta con otro término de búsqueda</p>
+              <Search size={48} className="mx-auto mb-4 opacity-20" />
+              <p className="text-base md:text-lg font-semibold mb-2">No se encontraron resultados</p>
+              <p className="text-xs md:text-sm">Intenta con otro término de búsqueda</p>
             </div>
           )}
 
@@ -698,43 +760,43 @@ export default function App() {
 
       {/* MINI PLAYER FOOTER */}
       {currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 px-6 py-4">
-          <div className="flex items-center justify-between gap-6 max-w-7xl mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 px-3 md:px-6 py-2 md:py-4">
+          <div className="flex items-center justify-between gap-2 md:gap-6 max-w-7xl mx-auto">
             {/* Info */}
             <div
-              className="flex items-center gap-4 min-w-0 cursor-pointer hover:text-pink-400 transition-colors"
+              className="flex items-center gap-2 md:gap-4 min-w-0 cursor-pointer hover:text-pink-400 transition-colors flex-1"
               onClick={() => setShowNowPlaying(true)}
             >
               <img
                 src={currentTrack?.image}
                 alt="cover"
-                className="w-14 h-14 rounded-lg object-cover shadow-lg flex-shrink-0"
+                className="w-10 md:w-14 h-10 md:h-14 rounded-lg object-cover shadow-lg flex-shrink-0"
                 onError={(e) => (e.target.style.display = 'none')}
               />
-              <div className="min-w-0">
-                <p className="font-semibold text-white truncate">{currentTrack?.title}</p>
-                <p className="text-sm text-slate-400 truncate">{currentTrack?.originalData?.snippet?.channelTitle || 'Artista'}</p>
+              <div className="min-w-0 hidden sm:block">
+                <p className="font-semibold text-white text-sm md:text-base truncate">{currentTrack?.title}</p>
+                <p className="text-xs md:text-sm text-slate-400 truncate">{currentTrack?.originalData?.snippet?.channelTitle || 'Artista'}</p>
               </div>
             </div>
 
             {/* Controles */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <button onClick={() => prevTrack()} className="text-slate-400 hover:text-white transition-colors">
-                <SkipBack size={20} />
+                <SkipBack size={18} className="md:w-5 md:h-5" />
               </button>
               <button
                 onClick={() => togglePlayPause()}
-                className="w-10 h-10 rounded-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center text-white transition-all transform hover:scale-105"
+                className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center text-white transition-all transform hover:scale-105"
               >
-                {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                {isPlaying ? <Pause size={16} className="md:w-5 md:h-5" fill="currentColor" /> : <Play size={16} className="md:w-5 md:h-5" fill="currentColor" />}
               </button>
               <button onClick={() => nextTrack()} className="text-slate-400 hover:text-white transition-colors">
-                <SkipForward size={20} />
+                <SkipForward size={18} className="md:w-5 md:h-5" />
               </button>
             </div>
 
-            {/* Volumen */}
-            <div className="flex items-center gap-3 min-w-max">
+            {/* Volumen - Solo en desktop */}
+            <div className="items-center gap-2 md:gap-3 min-w-max hidden md:flex">
               <Volume2 size={18} className="text-slate-400" />
               <input
                 type="range"
@@ -753,18 +815,18 @@ export default function App() {
       {/* PANTALLA DE REPRODUCCIÓN AMPLIADA */}
       {showNowPlaying && currentTrack && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md bg-slate-900 rounded-2xl p-8 shadow-2xl border border-slate-800">
+          <div className="relative w-full max-w-md bg-slate-900 rounded-2xl p-6 md:p-8 shadow-2xl border border-slate-800">
             <button
               className="absolute right-4 top-4 text-slate-400 hover:text-white transition-colors"
               onClick={() => setShowNowPlaying(false)}
             >
               <X size={24} />
             </button>
-            <div className="w-48 h-48 mx-auto rounded-xl overflow-hidden shadow-2xl mb-6">
+            <div className="w-40 md:w-48 h-40 md:h-48 mx-auto rounded-xl overflow-hidden shadow-2xl mb-6">
               <img src={currentTrack.image} alt={currentTrack.title} className="w-full h-full object-cover" onError={(e) => (e.target.style.display = 'none')} />
             </div>
-            <h3 className="text-2xl font-bold text-center text-white mb-1">{currentTrack.title}</h3>
-            <p className="text-slate-400 text-center mb-6">{currentTrack.originalData?.snippet?.channelTitle || ''}</p>
+            <h3 className="text-xl md:text-2xl font-bold text-center text-white mb-1">{currentTrack.title}</h3>
+            <p className="text-slate-400 text-center mb-6 text-sm md:text-base">{currentTrack.originalData?.snippet?.channelTitle || ''}</p>
 
             <div className="flex items-center justify-center gap-8 mb-8">
               <button onClick={() => prevTrack()} className="text-slate-400 hover:text-white transition-colors">
