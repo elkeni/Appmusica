@@ -1,114 +1,379 @@
+/* Import Modern Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* --- ESTILOS BASE GLOBALES --- */
 @layer base {
-  /* Fondo oscuro y texto blanco por defecto para toda la app */
+
+  /* Premium dark background with sophisticated gradient */
   body {
-    @apply bg-gray-900 text-white font-sans antialiased selection:bg-purple-500 selection:text-white;
-    /* Esto asegura que el scroll sea suave */
+    color: #f8f9fa;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, var(--gradient-start, #0a0e1a), var(--gradient-mid, #1a1428), var(--gradient-end, #0d0a1f));
+    background-attachment: fixed;
     scroll-behavior: smooth;
+    font-weight: 400;
+    letter-spacing: -0.011em;
   }
 
-  /* Títulos */
-  h1, h2, h3, h4, h5, h6 {
+  /* Rich selection color with purple accent */
+  ::selection {
+    background: var(--selection, rgba(139, 92, 246, 0.3));
+    color: white;
+  }
+
+  /* Enhanced typography with better spacing */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-bold tracking-tight;
+    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.4;
   }
 }
 
-/* --- SCROLLBARS PERSONALIZADOS (Estilo Spotify/Dark) --- */
-/* Funciona en Chrome, Edge, Safari */
+/* --- PREMIUM SCROLLBARS --- */
 ::-webkit-scrollbar {
-  width: 8px; /* Ancho vertical */
-  height: 8px; /* Alto horizontal */
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-900; /* Color del fondo del riel */
+  background: rgba(15, 15, 24, 0.4);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-700 rounded-full border-2 border-gray-900; /* La barra en sí */
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(99, 102, 241, 0.6));
+  border-radius: 10px;
+  border: 2px solid rgba(15, 15, 24, 0.4);
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500; /* Color al pasar el mouse */
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
 }
 
-/* --- UTILIDADES PERSONALIZADAS --- */
+/* --- PREMIUM DESIGN SYSTEM --- */
 @layer utilities {
-  /* Clase para ocultar la barra de scroll pero permitir deslizar */
-  /* Útil para carruseles de canciones o artistas */
+
+  /* Theme Variables: Sophisticated Purple/Blue with Gold Accents */
+  :root {
+    /* Primary Colors - Rich Purple Gradient */
+    --primary: #8b5cf6;
+    /* Vibrant purple */
+    --primary-600: #7c3aed;
+    --primary-700: #6d28d9;
+    --primary-light: #a78bfa;
+
+    /* Accent Colors - Electric Blue & Gold */
+    --accent: #3b82f6;
+    /* Electric blue */
+    --accent-600: #2563eb;
+    --accent-cyan: #06b6d4;
+    /* Cyan for variety */
+    --accent-gold: #fbbf24;
+    /* Premium gold */
+    --accent-gold-light: #fcd34d;
+
+    /* Background Foundations */
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #12141f;
+    --bg-tertiary: #1a1428;
+    --panel-dark: #0f1118;
+
+    /* Glass Effects */
+    --glass-bg: rgba(30, 27, 51, 0.65);
+    --glass-bg-light: rgba(30, 27, 51, 0.45);
+    --glass-bg-strong: rgba(30, 27, 51, 0.85);
+    --glass-border: rgba(139, 92, 246, 0.15);
+    --glass-border-subtle: rgba(255, 255, 255, 0.08);
+
+    /* Text Colors */
+    --text-primary: #f8f9fa;
+    --text-secondary: rgba(248, 249, 250, 0.8);
+    --muted-text: rgba(248, 249, 250, 0.6);
+
+    /* Gradients */
+    --gradient-start: #0a0e1a;
+    --gradient-mid: #1a1428;
+    --gradient-end: #0d0a1f;
+    --gradient-accent: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+    --gradient-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+
+    /* Selection */
+    --selection: rgba(139, 92, 246, 0.3);
+
+    /* Shadows */
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+    --shadow-glow-strong: 0 0 40px rgba(139, 92, 246, 0.5);
+  }
+
+  /* Hide scrollbar while maintaining scroll functionality */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE y Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
+
   .no-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari y Opera */
+    display: none;
   }
 
-  /* Efecto de brillo sutil */
+  /* Enhanced Glass Effects */
   .glass-effect {
-    @apply bg-gray-800/50 backdrop-blur-md border border-white/10;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border-subtle);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Glassmorphism - Efecto fluido con vidrio */
+  .glass-effect:hover {
+    border-color: var(--glass-border);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+  }
+
+  /* Premium Glassmorphism - Fluid Glass */
   .glass-fluid {
-    background: rgba(15, 23, 42, 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Variante más fuerte */
+  .glass-fluid:hover {
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow:
+      0 12px 48px rgba(139, 92, 246, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Strong Glass Variant */
   .glass-fluid-strong {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.5);
-  }
-
-  /* Variante más sutil */
-  .glass-fluid-subtle {
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
-  }
-
-  /* Con brillo y gradiente sutil */
-  .glass-fluid-glow {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.5) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  }
-
-  /* Efecto especial para mini player */
-  .glass-player {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.75) 100%);
+    background: var(--glass-bg-strong);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    box-shadow:
+      0 12px 48px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  /* Animación de brillo sutil */
+  /* Subtle Glass Variant */
+  .glass-fluid-subtle {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border-subtle);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Glowing Glass with Gradient */
+  .glass-fluid-glow {
+    background: linear-gradient(135deg, rgba(30, 27, 51, 0.75) 0%, rgba(20, 18, 38, 0.6) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 12px 40px rgba(139, 92, 246, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.4s ease;
+  }
+
+  .glass-fluid-glow:hover {
+    box-shadow:
+      0 16px 56px rgba(139, 92, 246, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Premium Player Glass */
+  .glass-player {
+    background: linear-gradient(135deg, rgba(15, 17, 30, 0.95) 0%, rgba(20, 18, 38, 0.9) 100%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow:
+      0 16px 64px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 0 0 1px rgba(139, 92, 246, 0.05) inset;
+  }
+
+  /* Shimmer Animation - Enhanced */
   @keyframes glass-shimmer {
-    0%, 100% {
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+    0%,
+    100% {
+      box-shadow:
+        0 8px 32px rgba(59, 130, 246, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
+
     50% {
-      box-shadow: 0 8px 32px 0 rgba(236, 72, 153, 0.3);
+      box-shadow:
+        0 12px 48px rgba(139, 92, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
   }
 
   .glass-shimmer {
     animation: glass-shimmer 3s ease-in-out infinite;
+  }
+
+  /* Premium Gradient Buttons */
+  .accent-gradient {
+    background: var(--gradient-accent);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow:
+      0 4px 16px rgba(139, 92, 246, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .accent-gradient:hover {
+    box-shadow:
+      0 8px 32px rgba(139, 92, 246, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .accent-gradient:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Gold Accent Gradient */
+  .accent-gold {
+    background: var(--gradient-gold);
+    color: #0a0e1a;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow:
+      0 4px 16px rgba(251, 191, 36, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .accent-gold:hover {
+    box-shadow:
+      0 8px 32px rgba(251, 191, 36, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* Premium Mobile Card */
+  .mobile-card {
+    background: linear-gradient(180deg, rgba(15, 17, 30, 0.98), rgba(12, 14, 22, 0.95));
+    border-radius: 32px;
+    padding: 16px;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+  }
+
+  .mobile-card:hover {
+    border-color: rgba(139, 92, 246, 0.2);
+    box-shadow:
+      0 16px 56px rgba(0, 0, 0, 0.8),
+      0 0 24px rgba(139, 92, 246, 0.1);
+  }
+
+  /* Now Playing UI - Premium Style */
+  .now-playing-ui {
+    background: linear-gradient(180deg, rgba(15, 17, 30, 0.98), rgba(20, 18, 38, 0.95));
+    border-radius: 24px;
+    padding: 24px;
+    color: var(--text-primary);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    box-shadow:
+      0 16px 64px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Animated Waveform Bars */
+  .waveform-bar {
+    background: var(--gradient-accent);
+    border-radius: 3px;
+    transition: all 0.15s ease;
+  }
+
+  @keyframes pulse-wave {
+
+    0%,
+    100% {
+      height: 50%;
+    }
+
+    50% {
+      height: 100%;
+    }
+  }
+
+  .waveform-bar.animate {
+    animation: pulse-wave 0.8s ease-in-out infinite;
+  }
+
+  /* Premium Hover Effects */
+  .hover-glow {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+  }
+
+  /* Text Gradients */
+  .text-gradient-primary {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Smooth Transitions */
+  * {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
