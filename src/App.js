@@ -221,7 +221,6 @@ export default function App() {
   const [view, setView] = useState('discover');
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [selectedPlaylistSongs, setSelectedPlaylistSongs] = useState([]);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [error, setError] = useState(null);
 
   // Mostrar pantalla de reproducción ampliada
@@ -319,7 +318,6 @@ export default function App() {
     }
     setLoading(true);
     setError(null);
-    setShowMobileMenu(false);
     try {
       const data = await searchMusic(searchTerm);
       setSearchResults(data);
@@ -544,18 +542,18 @@ export default function App() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full md:w-auto">
-        {/* TOP BAR */}
-        <header className="bg-slate-800/50 backdrop-blur-md border-b border-slate-700 px-4 md:px-8 py-3 md:py-4 flex items-center justify-between gap-2 md:gap-0">
+      <div className="flex-1 flex flex-col overflow-hidden w-full md:w-auto pb-20 md:pb-0">
+        {/* TOP BAR - DESKTOP ONLY */}
+        <header className="hidden md:flex bg-slate-800/50 backdrop-blur-md border-b border-slate-700 px-8 py-4 items-center justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg md:text-2xl font-bold text-white mb-0 md:mb-1 truncate">
+            <h2 className="text-2xl font-bold text-white mb-1 truncate">
               {view === 'discover' && '🎵 Descubrir'}
               {view === 'search' && '🔍 Busca'}
               {view === 'playlist-detail' && `📋 ${selectedPlaylist}`}
               {view === 'favorites' && '❤️ Favoritos'}
               {view === 'playlist' && '📋 Mi Playlist'}
             </h2>
-            <p className="text-xs md:text-sm text-slate-400 hidden md:block">
+            <p className="text-sm text-slate-400 hidden md:block">
               {view === 'discover' && `${discoverResults.length} canciones populares`}
               {view === 'search' && `${searchResults.length} resultados encontrados`}
               {view === 'playlist-detail' && `${selectedPlaylistSongs.length} canciones`}
@@ -563,16 +561,9 @@ export default function App() {
               {view === 'playlist' && `${playlist.filter((item) => !item.stationuuid).length} canciones en playlist`}
             </p>
           </div>
-          {/* Botón menú móvil */}
-          <button
-            onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className="md:hidden p-2 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </header>
 
-        {/* SEARCH BAR (en vistas discover y search) */}
+        {/* SEARCH BAR - MOBILE & DESKTOP */}
         {(view === 'discover' || view === 'search') && (
           <div className="bg-slate-800 px-4 md:px-8 py-3 md:py-4 border-b border-slate-700">
             <form onSubmit={handleSearch} className="relative w-full md:max-w-2xl">
@@ -588,63 +579,8 @@ export default function App() {
           </div>
         )}
 
-        {/* MOBILE MENU */}
-        {showMobileMenu && (
-          <nav className="md:hidden bg-black border-b border-slate-800 px-4 py-4 space-y-2">
-            <NavButton
-              icon={<Music size={20} />}
-              label="Descubrir"
-              active={view === 'discover'}
-              onClick={() => {
-                setView('discover');
-                setSearchResults([]);
-                setSearchTerm('');
-                setShowMobileMenu(false);
-              }}
-            />
-            <NavButton
-              icon={<Search size={20} />}
-              label="Buscar"
-              active={view === 'search'}
-              onClick={() => {
-                setView('search');
-                setShowMobileMenu(false);
-              }}
-            />
-            <NavButton
-              icon={<Heart size={20} />}
-              label="Favoritos"
-              active={view === 'favorites'}
-              onClick={() => {
-                setView('favorites');
-                setShowMobileMenu(false);
-              }}
-              badge={favorites.filter((item) => !item.stationuuid).length}
-            />
-            <NavButton
-              icon={<ListMusic size={20} />}
-              label="Mi Playlist"
-              active={view === 'playlist'}
-              onClick={() => {
-                setView('playlist');
-                setShowMobileMenu(false);
-              }}
-              badge={playlist.filter((item) => !item.stationuuid).length}
-            />
-            <button
-              onClick={() => {
-                handleLogout();
-                setShowMobileMenu(false);
-              }}
-              className="w-full px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-sm font-medium transition-all mt-4"
-            >
-              Cerrar sesión
-            </button>
-          </nav>
-        )}
-
         {/* CONTENT AREA */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto px-4 py-4 md:px-8 md:py-8">
           {loading && (
             <div className="flex justify-center items-center h-full">
               <div className="flex flex-col items-center gap-4">
@@ -655,7 +591,7 @@ export default function App() {
           )}
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 text-red-400">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6 text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -778,59 +714,92 @@ export default function App() {
         </main>
       </div>
 
-      {/* MINI PLAYER FOOTER */}
+      {/* MINI PLAYER FOOTER - SIEMPRE VISIBLE */}
       {currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 px-3 md:px-6 py-2 md:py-4">
-          <div className="flex items-center justify-between gap-2 md:gap-6 max-w-7xl mx-auto">
-            {/* Info */}
-            <div
-              className="flex items-center gap-2 md:gap-4 min-w-0 cursor-pointer hover:text-pink-400 transition-colors flex-1"
-              onClick={() => setShowNowPlaying(true)}
-            >
+        <div className="fixed bottom-0 left-0 right-0 md:bottom-24 bg-gradient-to-t from-slate-800 to-slate-800/95 border-t border-slate-700 px-4 py-3 cursor-pointer hover:from-slate-700" onClick={() => setShowNowPlaying(true)}>
+          <div className="flex items-center justify-between gap-3">
+            {/* Album Art */}
+            <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 shadow-lg">
               <img
                 src={currentTrack?.image}
                 alt="cover"
-                className="w-10 md:w-14 h-10 md:h-14 rounded-lg object-cover shadow-lg flex-shrink-0"
+                className="w-full h-full object-cover"
                 onError={(e) => (e.target.style.display = 'none')}
               />
-              <div className="min-w-0 hidden sm:block">
-                <p className="font-semibold text-white text-sm md:text-base truncate">{currentTrack?.title}</p>
-                <p className="text-xs md:text-sm text-slate-400 truncate">{currentTrack?.originalData?.snippet?.channelTitle || 'Artista'}</p>
-              </div>
+            </div>
+            
+            {/* Track Info */}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-white text-sm truncate">{currentTrack?.title}</p>
+              <p className="text-xs text-slate-400 truncate">{currentTrack?.originalData?.snippet?.channelTitle || 'Artista'}</p>
             </div>
 
-            {/* Controles */}
-            <div className="flex items-center gap-2 md:gap-4">
-              <button onClick={() => prevTrack()} className="text-slate-400 hover:text-white transition-colors">
-                <SkipBack size={18} className="md:w-5 md:h-5" />
-              </button>
-              <button
-                onClick={() => togglePlayPause()}
-                className="w-8 md:w-10 h-8 md:h-10 rounded-full bg-pink-500 hover:bg-pink-600 flex items-center justify-center text-white transition-all transform hover:scale-105"
-              >
-                {isPlaying ? <Pause size={16} className="md:w-5 md:h-5" fill="currentColor" /> : <Play size={16} className="md:w-5 md:h-5" fill="currentColor" />}
-              </button>
-              <button onClick={() => nextTrack()} className="text-slate-400 hover:text-white transition-colors">
-                <SkipForward size={18} className="md:w-5 md:h-5" />
-              </button>
-            </div>
-
-            {/* Volumen - Solo en desktop */}
-            <div className="items-center gap-2 md:gap-3 min-w-max hidden md:flex">
-              <Volume2 size={18} className="text-slate-400" />
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={volume}
-                onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-24 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
-              />
-            </div>
+            {/* Play/Pause Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayPause();
+              }}
+              className="bg-pink-500 hover:bg-pink-600 rounded-full p-2 text-white transition-all flex-shrink-0"
+            >
+              {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+            </button>
           </div>
         </div>
       )}
+
+      {/* BOTTOM NAVIGATION - MOBILE ONLY */}
+      <nav className="fixed md:hidden bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 px-0 py-2 flex items-center justify-around" style={{paddingBottom: currentTrack ? 'calc(5rem + env(safe-area-inset-bottom))' : 'env(safe-area-inset-bottom)'}}>
+        <button
+          onClick={() => {
+            setView('discover');
+            setSearchResults([]);
+            setSearchTerm('');
+          }}
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${view === 'discover' ? 'text-pink-500' : 'text-slate-400'}`}
+        >
+          <Music size={24} />
+          <span className="text-xs font-semibold">Inicio</span>
+        </button>
+        <button
+          onClick={() => setView('search')}
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${view === 'search' ? 'text-pink-500' : 'text-slate-400'}`}
+        >
+          <Search size={24} />
+          <span className="text-xs font-semibold">Buscar</span>
+        </button>
+        <button
+          onClick={() => setView('favorites')}
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all relative ${view === 'favorites' ? 'text-pink-500' : 'text-slate-400'}`}
+        >
+          <Heart size={24} />
+          <span className="text-xs font-semibold">Favoritos</span>
+          {favorites.filter((item) => !item.stationuuid).length > 0 && (
+            <span className="absolute top-0 right-0 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {favorites.filter((item) => !item.stationuuid).length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setView('playlist')}
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all relative ${view === 'playlist' ? 'text-pink-500' : 'text-slate-400'}`}
+        >
+          <ListMusic size={24} />
+          <span className="text-xs font-semibold">Playlist</span>
+          {playlist.filter((item) => !item.stationuuid).length > 0 && (
+            <span className="absolute top-0 right-0 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {playlist.filter((item) => !item.stationuuid).length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all text-slate-400 hover:text-red-400"
+        >
+          <X size={24} />
+          <span className="text-xs font-semibold">Salir</span>
+        </button>
+      </nav>
 
       {/* PANTALLA DE REPRODUCCIÓN AMPLIADA */}
       {showNowPlaying && currentTrack && (
