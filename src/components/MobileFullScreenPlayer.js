@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, SkipBack, ChevronDown, MoreHorizontal, Quote, ListMusic, Shuffle, Repeat, Heart, PlusCircle, User, X } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ChevronDown, MoreHorizontal, Quote, ListMusic, Shuffle, Repeat, Heart, PlusCircle, User } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { extractPaletteFromImage } from '../utils/colorUtils';
 import { getItemId } from '../utils/formatUtils';
 
 export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavorite, togglePlaylist, playlist }) {
-    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, currentTime, duration, playItem } = usePlayer();
+    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, currentTime, duration } = usePlayer();
     const [colors, setColors] = useState({ primary: '#1a1a1a', secondary: '#000000' });
     const [activeView, setActiveView] = useState('artwork'); // 'artwork', 'lyrics', 'queue'
     const [showMenu, setShowMenu] = useState(false);

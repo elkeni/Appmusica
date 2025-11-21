@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, ChevronRight, Plus } from 'lucide-react';
+import { Play, ChevronRight } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
-import { generatePersonalizedRecommendations } from '../services/recommendationService';
 import { getDeezerCharts } from '../services/hybridMusicService';
-import { formatDateShortSpanish, formatRelativeTimeSpanish } from '../utils/formatUtils';
-import SongCard from '../components/SongCard';
+import { formatDateShortSpanish } from '../utils/formatUtils';
 
 export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist }) {
     const navigate = useNavigate();
