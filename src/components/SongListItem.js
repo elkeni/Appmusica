@@ -1,6 +1,5 @@
 import React from 'react';
-import { Play, Heart } from 'lucide-react';
-import SongMenu from './SongMenu';
+import { Play } from 'lucide-react';
 
 export default function SongListItem({ item, index, onPlay, onFavorite, onAddPlaylist, onGoToAlbum, onRemoveFromPlaylist, isFavorite, isInPlaylist }) {
     const getThumbnail = () => {
@@ -15,7 +14,7 @@ export default function SongListItem({ item, index, onPlay, onFavorite, onAddPla
 
     const getTitle = () => item?.title || item?.snippet?.title || 'Canción sin título';
     const getArtist = () => item?.artist || item?.snippet?.channelTitle || 'Artista desconocido';
-    const getAlbum = () => item?.album?.title || 'Sencillo';
+    
     const getDuration = () => {
         if (item?.duration) {
             const seconds = item.duration % 60;

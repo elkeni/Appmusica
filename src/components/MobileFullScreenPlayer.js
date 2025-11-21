@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, SkipBack, ChevronDown, MoreHorizontal, Quote, ListMusic, Shuffle, Repeat } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
-import { extractPaletteFromImage, darkenHex } from '../utils/colorUtils';
-import { getItemId } from '../utils/formatUtils';
+import { extractPaletteFromImage } from '../utils/colorUtils';
 
 export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavorite, togglePlaylist, playlist }) {
-    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, currentTime, duration, playerRef } = usePlayer();
+    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, currentTime, duration } = usePlayer();
     const [colors, setColors] = useState({ primary: '#1a1a1a', secondary: '#000000' });
     const [showLyrics, setShowLyrics] = useState(false);
     const [showQueue, setShowQueue] = useState(false);

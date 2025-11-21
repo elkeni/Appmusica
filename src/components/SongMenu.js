@@ -38,9 +38,8 @@ export default function SongMenu({
 
     const toggleMenu = (e) => {
         e.stopPropagation();
-        if (!isOpen) {
+            if (!isOpen) {
             const rect = buttonRef.current.getBoundingClientRect();
-            const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
 
             // Default position (bottom-right relative to button)

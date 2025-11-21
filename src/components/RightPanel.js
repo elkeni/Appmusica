@@ -1,10 +1,10 @@
 import React from 'react';
-import { Play, Pause, SkipForward, SkipBack, Heart, Plus, Music } from 'lucide-react';
+import { Heart, Plus, Music } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { getItemId } from '../utils/formatUtils';
 
 export default function RightPanel({ favorites, toggleFavorite, togglePlaylist, playlist }) {
-  const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, queue } = usePlayer();
+  const { currentTrack, queue, nextTrack } = usePlayer();
 
   if (!currentTrack) {
     return (

@@ -158,7 +158,7 @@ export const PlayerProvider = ({ children }) => {
             cancelled = true;
             if (intervalId) clearInterval(intervalId);
         };
-    }, [currentTrack?.id]);
+    }, [currentTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Force Autoplay on Track Change
     useEffect(() => {

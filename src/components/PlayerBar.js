@@ -1,11 +1,10 @@
 import React from 'react';
 import { Play, Pause, Volume2, SkipForward, SkipBack, Heart } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
-import SongMenu from './SongMenu';
 import { getItemId } from '../utils/formatUtils';
 
 export default function PlayerBar({ onShowNowPlaying, favorites, toggleFavorite, onAddToPlaylist, onGoToAlbum }) {
-    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, volume, setVolume, currentTime, duration, waveformBaseline } = usePlayer();
+    const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, volume, setVolume, currentTime, duration } = usePlayer();
 
     if (!currentTrack) return null;
 
