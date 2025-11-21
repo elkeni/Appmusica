@@ -19,7 +19,7 @@ import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 
 // Pages
-import BrowseView from './components/BrowseView'; // Keeping as component for now as per plan
+import HomeView from './pages/HomeView'; // New Apple Music-style home
 import SearchResults from './pages/SearchResults';
 import ArtistDetail from './pages/ArtistDetail';
 import AlbumDetail from './pages/AlbumDetail';
@@ -42,8 +42,17 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      
       if (currentUser) {
-        // Load user data
+        // Store user data in localStorage for access in child components
+        localStorage.setItem('appmusica_user', JSON.stringify({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL
+        }));
+
+        // Load user data from Firestore
         try {
           const userDocRef = doc(db, 'users', currentUser.uid);
           const userDoc = await getDoc(userDocRef);
@@ -56,14 +65,19 @@ export default function App() {
             // Initialize new user
             await setDoc(userDocRef, {
               email: currentUser.email,
+              displayName: currentUser.displayName,
+              photoURL: currentUser.photoURL,
               favorites: [],
-              playlists: []
+              playlists: [],
+              createdAt: new Date().toISOString()
             });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
         }
       } else {
+        // Clear user data on logout
+        localStorage.removeItem('appmusica_user');
         setFavorites([]);
         setUserPlaylists([]);
       }
@@ -174,7 +188,7 @@ export default function App() {
             <div className="flex-1 p-6">
               <Routes>
                 <Route path="/" element={
-                  <BrowseView
+                  <HomeView
                     favorites={favorites}
                     onToggleFavorite={toggleFavorite}
                     onAddPlaylist={openAddToPlaylistModal}

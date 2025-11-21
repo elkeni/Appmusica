@@ -33,3 +33,72 @@ export const getThumbnail = (item) => {
     return 'https://placehold.co/300x300/1e293b/ffffff?text=Music';
 };
 
+/**
+ * Format date in Spanish format
+ * Example: "21 de noviembre de 2025"
+ */
+export const formatDateSpanish = (date) => {
+    if (!date) return '';
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    const months = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    
+    const day = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+    
+    return `${day} de ${month} de ${year}`;
+};
+
+/**
+ * Format date in short Spanish format
+ * Example: "21 nov 2025"
+ */
+export const formatDateShortSpanish = (date) => {
+    if (!date) return '';
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    const monthsShort = [
+        'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+        'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+    ];
+    
+    const day = dateObj.getDate();
+    const month = monthsShort[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+    
+    return `${day} ${month} ${year}`;
+};
+
+/**
+ * Format relative time in Spanish
+ * Example: "hace 2 días", "hace 1 hora"
+ */
+export const formatRelativeTimeSpanish = (date) => {
+    if (!date) return '';
+    
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const now = new Date();
+    const diffMs = now - dateObj;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    
+    if (diffSecs < 60) return 'hace unos segundos';
+    if (diffMins < 60) return `hace ${diffMins} ${diffMins === 1 ? 'minuto' : 'minutos'}`;
+    if (diffHours < 24) return `hace ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
+    if (diffDays < 7) return `hace ${diffDays} ${diffDays === 1 ? 'día' : 'días'}`;
+    if (diffWeeks < 4) return `hace ${diffWeeks} ${diffWeeks === 1 ? 'semana' : 'semanas'}`;
+    if (diffMonths < 12) return `hace ${diffMonths} ${diffMonths === 1 ? 'mes' : 'meses'}`;
+    
+    return formatDateShortSpanish(dateObj);
+};
+
