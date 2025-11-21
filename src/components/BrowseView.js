@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Heart, ChevronRight, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Play, ChevronRight, Clock } from 'lucide-react';
 import { getDeezerCharts, getDeezerGenres, searchDeezer } from '../services/hybridMusicService';
+import { usePlayer } from '../context/PlayerContext';
 import SongCard from './SongCard';
 
-export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favorites, onAddPlaylist, history = [] }) {
+export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist }) {
+    const navigate = useNavigate();
+    const { playItem, history } = usePlayer();
     const [heroData, setHeroData] = useState(null);
     const [charts, setCharts] = useState([]);
     const [channels, setChannels] = useState([]); // Artists
@@ -80,7 +84,7 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
 
             {/* Section A: Cinematic Hero */}
             {heroData && (
-                <section className="relative w-full h-[500px] md:h-[600px] shrink-0 group overflow-hidden">
+                <section className="relative w-full min-h-[40vh] md:min-h-[50vh] shrink-0 group overflow-hidden">
                     <div className="absolute inset-0">
                         <img
                             src={heroData.artist?.picture_xl || heroData.coverBig || heroData.image}
@@ -104,7 +108,7 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
                             </p>
 
                             <button
-                                onClick={() => onPlay(heroData, { type: 'COLLECTION', items: charts, id: 'charts' })}
+                                onClick={() => playItem(heroData, charts)}
                                 className="px-10 py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full font-bold text-xl shadow-2xl hover:scale-105 transition-all flex items-center gap-3 backdrop-blur-md border border-white/20 group-hover:shadow-purple-500/40"
                             >
                                 <Play fill="currentColor" size={24} /> Reproducir Ahora
@@ -123,7 +127,7 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
                             <div
                                 key={artist.id}
                                 className="flex flex-col items-center gap-3 flex-none group cursor-pointer"
-                                onClick={() => onNavigate('artist', artist)}
+                                onClick={() => navigate(`/artist/${artist.id}`)}
                             >
                                 <div className="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-gradient-to-tr from-purple-500 to-orange-500 group-hover:scale-105 transition-transform duration-300">
                                     <div className="w-full h-full rounded-full border-4 border-[#0a0e1a] overflow-hidden">
@@ -154,8 +158,8 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
                         {history.slice(0, 10).map((item, idx) => (
                             <div
                                 key={`${item.id}-${idx}`}
-                                className="flex-none w-[120px] group cursor-pointer"
-                                onClick={() => onPlay(item, history)}
+                                className="flex-none w-28 md:w-32 group cursor-pointer"
+                                onClick={() => playItem(item, history)}
                             >
                                 <div className="aspect-square rounded-xl overflow-hidden mb-2 relative">
                                     <img src={item.cover || item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
@@ -180,14 +184,14 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
                 </div>
 
                 <div className="flex overflow-x-auto gap-6 pb-4 -mx-6 px-6 md:px-12 scroll-snap-x hide-scrollbar">
-                    {charts.map((track) => (
-                        <div key={track.id} className="flex-none w-[180px] md:w-[220px] scroll-snap-align-start">
+                    {charts.filter(Boolean).map((track) => (
+                        <div key={track.id} className="flex-none w-40 md:w-56 scroll-snap-align-start">
                             <SongCard
                                 item={track}
-                                onPlay={(t) => onPlay(t, charts)}
+                                onPlay={(t) => playItem(t, charts)}
                                 onFavorite={onToggleFavorite}
                                 onAddPlaylist={onAddPlaylist}
-                                isFavorite={favorites.some(f => f.id === track.id)}
+                                isFavorite={favorites?.some(f => f?.id === track?.id)}
                             />
                         </div>
                     ))}
@@ -197,7 +201,7 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
             {/* Section E: Moods & Genres (Gradient Grid) */}
             <section className="px-6 md:px-12 flex flex-col gap-8">
                 <h2 className="text-3xl font-bold text-white tracking-tight">Moods & Genres</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6">
                     {genres.map((genre, idx) => (
                         <div
                             key={genre.id}
@@ -217,3 +221,5 @@ export default function BrowseView({ onPlay, onNavigate, onToggleFavorite, favor
         </div>
     );
 }
+
+

@@ -376,4 +376,70 @@
   * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* --- LAYOUT GRID --- */
+  .main-layout {
+    display: grid;
+    height: 100vh;
+    height: 100dvh;
+    /* Mobile viewport fix */
+    overflow: hidden;
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "main"
+      "player";
+    padding-bottom: 80px;
+    /* Space for BottomNav on mobile */
+  }
+
+  /* Desktop Layout */
+  @media (min-width: 768px) {
+    .main-layout {
+      padding-bottom: 0;
+      /* Reset padding on desktop */
+      grid-template-rows: 1fr 90px;
+      grid-template-columns: 240px 1fr 300px;
+      grid-template-areas:
+        "nav main right-panel"
+        "player player player";
+    }
+  }
+
+  /* Grid Areas */
+  .area-nav {
+    grid-area: nav;
+  }
+
+  .area-main {
+    grid-area: main;
+  }
+
+  .area-right-panel {
+    grid-area: right-panel;
+  }
+
+  .area-player {
+    grid-area: player;
+    z-index: 40;
+    /* Ensure above content but below nav/modals */
+    position: sticky;
+    bottom: 0;
+  }
+
+  /* Hide Right Panel on Mobile */
+  .area-right-panel {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .area-right-panel {
+      display: block;
+    }
+  }
+
+  /* Safe Area Utility */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from './firebase';
+import { auth } from '../firebase';
 import { Music } from 'lucide-react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
@@ -34,11 +34,12 @@ const AuthContent = ({ onAuthSuccess }) => {
     setLoading(true);
     setError(null);
     try {
-      const decoded = jwtDecode(credentialResponse.credential);
+      // const decoded = jwtDecode(credentialResponse.credential);
       const provider = new GoogleAuthProvider();
-      
+
       // Usar signInWithPopup con Google
-      const result = await signInWithPopup(auth, provider);
+      // const result = await signInWithPopup(auth, provider);
+      await signInWithPopup(auth, provider);
       onAuthSuccess();
     } catch (error) {
       setError('Error al iniciar sesión con Google: ' + error.message);

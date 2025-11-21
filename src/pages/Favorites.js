@@ -1,27 +1,57 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
+import { usePlayer } from '../context/PlayerContext';
+import SongListItem from '../components/SongListItem';
+import { getItemId } from '../utils/formatUtils';
 
-export default function Favorites({ items = [], onPlay = () => {}, onToggle = () => {} }) {
+export default function Favorites({ favorites, toggleFavorite, onAddPlaylist }) {
+  const navigate = useNavigate();
+  const { playItem } = usePlayer();
+
   return (
-    <div className="p-4 mobile-card">
-      <h2 className="text-lg font-bold mb-3">Favorites</h2>
-      {items.length === 0 ? (
-        <p className="text-sm text-slate-400">Aún no tienes favoritos.</p>
-      ) : (
-        <ul className="space-y-2">
-          {items.map((it, idx) => (
-            <li key={it.id?.videoId || idx} className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold">{it.snippet?.title}</div>
-                <div className="text-xs text-slate-400">{it.snippet?.channelTitle}</div>
+    <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-8 pb-24">
+      <div className="mb-8 glass-fluid-glow rounded-3xl overflow-hidden shadow-2xl">
+        <div className="relative h-48 md:h-64 bg-gradient-to-br from-pink-600 to-purple-700">
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+            <div className="flex items-end gap-6">
+              <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden shadow-2xl border-4 border-white/20 flex-shrink-0 bg-white/10 flex items-center justify-center">
+                <Heart size={64} className="text-white fill-white" />
               </div>
-              <div className="flex items-center gap-2">
-                <button className="px-3 py-1 rounded-md accent-gradient" onClick={() => onPlay(it)}>Play</button>
-                <button className="px-3 py-1 rounded-md glass-fluid-subtle" onClick={() => onToggle(it)}>Remove</button>
+              <div className="flex-1 pb-4">
+                <p className="text-sm text-pink-200 font-semibold mb-2 uppercase tracking-wider">Colección</p>
+                <h1 className="text-4xl md:text-6xl font-black text-white mb-3">Mis Me Gusta</h1>
+                <div className="flex items-center gap-4 text-sm text-pink-100 font-medium">
+                  <span>• {favorites.length} canciones que te encantan</span>
+                </div>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col bg-slate-800/30 rounded-3xl p-2 md:p-4 backdrop-blur-sm">
+        {favorites && favorites.length > 0 ? (
+          favorites.map((track, idx) => (
+            <SongListItem
+              key={getItemId(track)}
+              item={track}
+              index={idx}
+              onPlay={(t) => playItem(t, favorites)}
+              onFavorite={toggleFavorite}
+              onAddPlaylist={onAddPlaylist}
+              isFavorite={true}
+            />
+          ))
+        ) : (
+          <div className="py-20 text-center text-slate-400">
+            <Heart size={48} className="mx-auto mb-4 opacity-30" />
+            <p className="text-lg font-semibold">Aún no tienes favoritos</p>
+            <p className="text-sm">Dale "Me gusta" a las canciones para guardarlas aquí</p>
+            <button onClick={() => navigate('/')} className="mt-6 px-6 py-2 rounded-full accent-gradient text-white font-bold">Explorar Música</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

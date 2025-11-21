@@ -1,9 +1,10 @@
 import React from 'react';
-import { Music, ListMusic, Heart, Search, Radio as RadioIcon, Disc } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Music, ListMusic, Search, Radio as RadioIcon, Disc } from 'lucide-react';
 
-export default function Sidebar({ user, view, setView, playlist, favorites, handleLogout }) {
+export default function Sidebar({ user, playlist, favorites, handleLogout }) {
   return (
-    <aside className="hidden md:flex md:w-72 glass-fluid-strong flex-col overflow-y-auto p-0 m-6 rounded-3xl shadow-2xl border border-white/10">
+    <aside className="h-full w-full flex flex-col overflow-y-auto border-r border-white/5 bg-slate-900/30">
       {/* Logo y nombre */}
       <div className="flex items-center gap-3 px-8 pt-8 pb-6">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg accent-gradient">
@@ -20,42 +21,36 @@ export default function Sidebar({ user, view, setView, playlist, favorites, hand
         <p className="uppercase text-xs font-bold text-slate-400 px-8 mb-3 tracking-widest">Library</p>
         <nav className="flex flex-col gap-1 px-2">
           <SidebarButton
+            to="/"
             icon={<Music size={20} />}
             label="Browse"
-            active={view === 'discover'}
-            onClick={() => setView('discover')}
           />
           <SidebarButton
+            to="/playlist/default" // Assuming default playlist for now, or handle differently
             icon={<ListMusic size={20} />}
             label="Songs"
-            active={view === 'playlist'}
-            onClick={() => setView('playlist')}
-            badge={playlist.filter((item) => !item.stationuuid).length}
+            badge={playlist.filter((item) => item && !item.stationuuid).length}
           />
           <SidebarButton
+            to="/favorites"
             icon={<Disc size={20} />}
-            label="Albums"
-            active={view === 'favorites'}
-            onClick={() => setView('favorites')}
-            badge={favorites.filter((item) => !item.stationuuid).length}
+            label="Favorites"
+            badge={favorites.filter((item) => item && !item.stationuuid).length}
           />
           <SidebarButton
+            to="/library"
             icon={<ListMusic size={20} />}
             label="Playlists"
-            active={view === 'user-playlists'}
-            onClick={() => setView('user-playlists')}
           />
           <SidebarButton
+            to="/search"
             icon={<Search size={20} />}
-            label="Artists"
-            active={view === 'search'}
-            onClick={() => setView('search')}
+            label="Search"
           />
           <SidebarButton
+            to="/radio"
             icon={<RadioIcon size={20} />}
             label="Radio"
-            active={view === 'radio'}
-            onClick={() => setView('radio')}
           />
         </nav>
       </div>
@@ -77,11 +72,11 @@ export default function Sidebar({ user, view, setView, playlist, favorites, hand
   );
 }
 
-function SidebarButton({ icon, label, active, onClick, badge }) {
+function SidebarButton({ to, icon, label, badge }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-6 py-3 rounded-xl transition-all ${active
+    <NavLink
+      to={to}
+      className={({ isActive }) => `w-full flex items-center gap-3 px-6 py-3 rounded-xl transition-all ${isActive
         ? 'bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border border-purple-400/30 shadow-lg'
         : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
         }`}
@@ -91,6 +86,7 @@ function SidebarButton({ icon, label, active, onClick, badge }) {
       {badge > 0 && (
         <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">{badge}</span>
       )}
-    </button>
+    </NavLink>
   );
 }
+
