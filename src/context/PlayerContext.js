@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { getYouTubeVideoForTrack, getSimilarTracks } from '../services/hybridMusicService';
 import { getItemId } from '../utils/formatUtils';
 import { extractPaletteFromImage, darkenHex } from '../utils/colorUtils';
@@ -179,35 +179,9 @@ export const PlayerProvider = ({ children }) => {
         } catch (err) { }
     }, [isPlaying, volume]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Media Session API
-    useEffect(() => {
-        if ('mediaSession' in navigator && currentTrack) {
-            navigator.mediaSession.metadata = new window.MediaMetadata({
-                title: currentTrack.title,
-                artist: currentTrack.artist || currentTrack.originalData?.artist || 'Unknown Artist',
-                album: currentTrack.album || currentTrack.originalData?.album?.title || '',
-                artwork: [
-                    { src: currentTrack.image, sizes: '512x512', type: 'image/jpeg' },
-                    { src: currentTrack.image, sizes: '256x256', type: 'image/jpeg' }
-                ]
-            });
+    // Media Session API is attached later after handler functions are defined.
 
-            navigator.mediaSession.setActionHandler('play', () => {
-                setIsPlaying(true);
-            });
-            navigator.mediaSession.setActionHandler('pause', () => {
-                setIsPlaying(false);
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', () => {
-                handlePrevTrack();
-            });
-            navigator.mediaSession.setActionHandler('nexttrack', () => {
-                handleNextTrack();
-            });
-        }
-    }, [currentTrack]);
-
-    const playItem = async (item, context = null) => {
+    const playItem = useCallback(async (item, context = null) => {
         try {
             const isDeezer = item?.deezerId || (item?.id && !item?.id?.videoId && !item?.videoId);
             let videoId;
@@ -305,9 +279,9 @@ export const PlayerProvider = ({ children }) => {
             setError('Error al reproducir la canción.');
             setLoading(false);
         }
-    };
+    }, [setLoading, setError, setCurrentTrack, setIsPlaying, setHistory, setQueue, setPlaybackContext]);
 
-    const handleNextTrack = async () => {
+    const handleNextTrack = useCallback(async () => {
         if (queue.length > 0) {
             const nextTrack = queue[0];
             setQueue(prev => prev.slice(1));
@@ -329,9 +303,9 @@ export const PlayerProvider = ({ children }) => {
         } else {
             setIsPlaying(false);
         }
-    };
+    }, [queue, playbackContext, currentTrack, playItem]);
 
-    const handlePrevTrack = () => {
+    const handlePrevTrack = useCallback(() => {
         // Basic implementation - ideally should go to history
         if (currentTime > 3) {
             if (ytPlayerRef.current) ytPlayerRef.current.seekTo(0);
@@ -344,7 +318,35 @@ export const PlayerProvider = ({ children }) => {
             // For now, let's just restart current track
             if (ytPlayerRef.current) ytPlayerRef.current.seekTo(0);
         }
-    };
+    }, [currentTime, history]);
+
+    // Media Session API
+    useEffect(() => {
+        if ('mediaSession' in navigator && currentTrack) {
+            navigator.mediaSession.metadata = new window.MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artist || currentTrack.originalData?.artist || 'Unknown Artist',
+                album: currentTrack.album || currentTrack.originalData?.album?.title || '',
+                artwork: [
+                    { src: currentTrack.image, sizes: '512x512', type: 'image/jpeg' },
+                    { src: currentTrack.image, sizes: '256x256', type: 'image/jpeg' }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                setIsPlaying(true);
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                setIsPlaying(false);
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                handlePrevTrack();
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                handleNextTrack();
+            });
+        }
+    }, [currentTrack, handleNextTrack, handlePrevTrack]);
 
     const togglePlayPause = () => {
         if (!currentTrack) return;
