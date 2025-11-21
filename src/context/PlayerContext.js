@@ -160,22 +160,10 @@ export const PlayerProvider = ({ children }) => {
         };
     }, [currentTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Force Autoplay on Track Change
-    useEffect(() => {
-        if (currentTrack && ytPlayerRef.current) {
-            setIsPlaying(true);
-            // Force play after a small delay to allow player to load
-            setTimeout(() => {
-                try {
-                    if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === 'function') {
-                        ytPlayerRef.current.playVideo();
-                    }
-                } catch (e) {
-                    console.warn("Autoplay prevented:", e);
-                }
-            }, 100);
-        }
-    }, [currentTrack, isPlaying]); // Added isPlaying to dependencies, removed others as they are stable or refs
+    // When a new track is set, we rely on `setIsPlaying(true)` from `playItem`,
+    // the YT player's `onReady` handler, and the `Player Controls Sync` effect
+    // below to perform the actual play. Removing an extra effect that forced
+    // autoplay prevents race conditions where re-renders could auto-resume playback.
 
     // Player Controls Sync
     useEffect(() => {
@@ -190,6 +178,34 @@ export const PlayerProvider = ({ children }) => {
             }
         } catch (err) { }
     }, [isPlaying, volume]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Media Session API
+    useEffect(() => {
+        if ('mediaSession' in navigator && currentTrack) {
+            navigator.mediaSession.metadata = new window.MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artist || currentTrack.originalData?.artist || 'Unknown Artist',
+                album: currentTrack.album || currentTrack.originalData?.album?.title || '',
+                artwork: [
+                    { src: currentTrack.image, sizes: '512x512', type: 'image/jpeg' },
+                    { src: currentTrack.image, sizes: '256x256', type: 'image/jpeg' }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                setIsPlaying(true);
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                setIsPlaying(false);
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                handlePrevTrack();
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                handleNextTrack();
+            });
+        }
+    }, [currentTrack]);
 
     const playItem = async (item, context = null) => {
         try {
@@ -243,12 +259,11 @@ export const PlayerProvider = ({ children }) => {
             }
 
             setCurrentTrack(trackData);
+            // Mark playing intention; the Player Controls Sync effect and
+            // YT onReady will handle calling the player's play method when
+            // the player is ready. This avoids calling play() directly here
+            // and prevents race conditions that cause flicker/auto-resume.
             setIsPlaying(true);
-
-            // Force immediate play attempt
-            if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === 'function') {
-                ytPlayerRef.current.playVideo();
-            }
 
             setHistory(prev => [trackData, ...prev.filter(t => t.id !== trackData.id)].slice(0, 20));
 

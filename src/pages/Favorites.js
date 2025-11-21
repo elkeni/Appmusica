@@ -11,17 +11,17 @@ export default function Favorites({ favorites, toggleFavorite, onAddPlaylist }) 
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-8 pb-24">
-      <div className="mb-8 glass-fluid-glow rounded-3xl overflow-hidden shadow-2xl">
-        <div className="relative h-48 md:h-64 bg-gradient-to-br from-pink-600 to-purple-700">
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-            <div className="flex items-end gap-6">
-              <div className="w-32 h-32 md:w-48 md:h-48 rounded-xl overflow-hidden shadow-2xl border-4 border-white/20 flex-shrink-0 bg-white/10 flex items-center justify-center">
-                <Heart size={64} className="text-white fill-white" />
+      <div className="mb-4 md:mb-8 glass-fluid-glow rounded-3xl overflow-hidden shadow-2xl">
+        <div className="relative h-32 md:h-64 bg-gradient-to-br from-pink-600 to-purple-700">
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+            <div className="flex items-end gap-4 md:gap-6">
+              <div className="w-20 h-20 md:w-48 md:h-48 rounded-xl overflow-hidden shadow-2xl border-2 md:border-4 border-white/20 flex-shrink-0 bg-white/10 flex items-center justify-center">
+                <Heart size={32} className="text-white fill-white md:w-16 md:h-16" />
               </div>
-              <div className="flex-1 pb-4">
-                <p className="text-sm text-pink-200 font-semibold mb-2 uppercase tracking-wider">Colección</p>
-                <h1 className="text-4xl md:text-6xl font-black text-white mb-3">Mis Me Gusta</h1>
-                <div className="flex items-center gap-4 text-sm text-pink-100 font-medium">
+              <div className="flex-1 pb-1 md:pb-4">
+                <p className="text-[10px] md:text-sm text-pink-200 font-semibold mb-1 md:mb-2 uppercase tracking-wider">Colección</p>
+                <h1 className="text-2xl md:text-6xl font-black text-white mb-1 md:mb-3">Mis Me Gusta</h1>
+                <div className="flex items-center gap-4 text-xs md:text-sm text-pink-100 font-medium">
                   <span>• {favorites.length} canciones que te encantan</span>
                 </div>
               </div>

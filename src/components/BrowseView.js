@@ -84,7 +84,7 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
 
             {/* Section A: Cinematic Hero */}
             {heroData && (
-                <section className="relative w-full min-h-[40vh] md:min-h-[50vh] shrink-0 group overflow-hidden">
+                <section className="relative w-full aspect-video md:min-h-[50vh] shrink-0 group overflow-hidden">
                     <div className="absolute inset-0">
                         <img
                             src={heroData.artist?.picture_xl || heroData.coverBig || heroData.image}
@@ -95,23 +95,23 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
                         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e1a]/80 via-transparent to-transparent"></div>
                     </div>
 
-                    <div className="absolute bottom-0 left-0 p-8 md:p-16 w-full md:w-2/3 z-10 flex flex-col justify-end h-full">
+                    <div className="absolute bottom-0 left-0 p-6 md:p-16 w-full md:w-2/3 z-10 flex flex-col justify-end h-full">
                         <div className="animate-fade-in-up">
-                            <h2 className="text-sm font-bold tracking-widest text-purple-300 uppercase mb-4 drop-shadow-md">
+                            <h2 className="text-xs md:text-sm font-bold tracking-widest text-purple-300 uppercase mb-2 md:mb-4 drop-shadow-md">
                                 Destacado de Hoy
                             </h2>
-                            <h1 className="text-6xl md:text-8xl font-black text-white mb-2 leading-none drop-shadow-2xl tracking-tighter">
+                            <h1 className="text-3xl md:text-8xl font-black text-white mb-1 md:mb-2 leading-none drop-shadow-2xl tracking-tighter">
                                 {heroData.title}
                             </h1>
-                            <p className="text-2xl md:text-3xl text-slate-200 mb-10 font-bold drop-shadow-lg">
+                            <p className="text-lg md:text-3xl text-slate-200 mb-6 md:mb-10 font-bold drop-shadow-lg">
                                 {heroData.artist}
                             </p>
 
                             <button
                                 onClick={() => playItem(heroData, charts)}
-                                className="px-10 py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full font-bold text-xl shadow-2xl hover:scale-105 transition-all flex items-center gap-3 backdrop-blur-md border border-white/20 group-hover:shadow-purple-500/40"
+                                className="px-6 py-3 md:px-10 md:py-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full font-bold text-sm md:text-xl shadow-2xl hover:scale-105 transition-all flex items-center gap-2 md:gap-3 backdrop-blur-md border border-white/20 group-hover:shadow-purple-500/40"
                             >
-                                <Play fill="currentColor" size={24} /> Reproducir Ahora
+                                <Play fill="currentColor" size={18} className="md:w-6 md:h-6" /> Reproducir Ahora
                             </button>
                         </div>
                     </div>
@@ -121,15 +121,15 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
             {/* Section B: Featured Channels (Artists) */}
             {channels.length > 0 && (
                 <section className="px-6 md:px-12">
-                    <h2 className="text-2xl font-bold text-white mb-6 tracking-tight">Canales Destacados</h2>
-                    <div className="flex overflow-x-auto gap-6 pb-4 -mx-6 px-6 md:px-12 hide-scrollbar">
+                    <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 tracking-tight">Canales Destacados</h2>
+                    <div className="flex overflow-x-auto gap-4 md:gap-6 pb-4 -mx-6 px-6 md:px-12 hide-scrollbar">
                         {channels.map((artist) => (
                             <div
                                 key={artist.id}
-                                className="flex flex-col items-center gap-3 flex-none group cursor-pointer"
+                                className="flex flex-col items-center gap-2 md:gap-3 flex-none group cursor-pointer"
                                 onClick={() => navigate(`/artist/${artist.id}`)}
                             >
-                                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-gradient-to-tr from-purple-500 to-orange-500 group-hover:scale-105 transition-transform duration-300">
+                                <div className="w-20 h-20 md:w-28 md:h-28 rounded-full p-1 bg-gradient-to-tr from-purple-500 to-orange-500 group-hover:scale-105 transition-transform duration-300">
                                     <div className="w-full h-full rounded-full border-4 border-[#0a0e1a] overflow-hidden">
                                         <img
                                             src={artist.picture_medium || artist.image}
@@ -138,7 +138,7 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
                                         />
                                     </div>
                                 </div>
-                                <p className="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors text-center truncate w-24">
+                                <p className="text-xs md:text-sm font-semibold text-slate-300 group-hover:text-white transition-colors text-center truncate w-20 md:w-24">
                                     {artist.name}
                                 </p>
                             </div>
@@ -151,14 +151,14 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
             {history && history.length > 0 && (
                 <section className="px-6 md:px-12 opacity-60 hover:opacity-100 transition-opacity duration-500">
                     <div className="flex items-center gap-2 mb-4 text-slate-400">
-                        <Clock size={18} />
-                        <h2 className="text-lg font-bold uppercase tracking-wider">Historial de Reproducción</h2>
+                        <Clock size={16} className="md:w-[18px]" />
+                        <h2 className="text-base md:text-lg font-bold uppercase tracking-wider">Historial de Reproducción</h2>
                     </div>
-                    <div className="flex overflow-x-auto gap-4 pb-2 -mx-6 px-6 md:px-12 hide-scrollbar">
+                    <div className="flex overflow-x-auto gap-3 md:gap-4 pb-2 -mx-6 px-6 md:px-12 hide-scrollbar">
                         {history.slice(0, 10).map((item, idx) => (
                             <div
                                 key={`${item.id}-${idx}`}
-                                className="flex-none w-28 md:w-32 group cursor-pointer"
+                                className="flex-none w-24 md:w-32 group cursor-pointer"
                                 onClick={() => playItem(item, history)}
                             >
                                 <div className="aspect-square rounded-xl overflow-hidden mb-2 relative">
@@ -167,7 +167,7 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
                                         <Play fill="white" size={20} className="text-white" />
                                     </div>
                                 </div>
-                                <p className="text-xs font-semibold text-slate-300 truncate">{item.title}</p>
+                                <p className="text-[10px] md:text-xs font-semibold text-slate-300 truncate">{item.title}</p>
                             </div>
                         ))}
                     </div>
@@ -175,17 +175,17 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
             )}
 
             {/* Section D: Featured Tracks */}
-            <section className="px-6 md:px-12 flex flex-col gap-6">
+            <section className="px-6 md:px-12 flex flex-col gap-4 md:gap-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-3xl font-bold text-white tracking-tight">Featured Tracks</h2>
-                    <button className="text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Featured Tracks</h2>
+                    <button className="text-xs md:text-sm font-bold text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
                         View All <ChevronRight size={16} />
                     </button>
                 </div>
 
-                <div className="flex overflow-x-auto gap-6 pb-4 -mx-6 px-6 md:px-12 scroll-snap-x hide-scrollbar">
+                <div className="flex overflow-x-auto gap-4 md:gap-6 pb-4 -mx-6 px-6 md:px-12 scroll-snap-x hide-scrollbar">
                     {charts.filter(Boolean).map((track) => (
-                        <div key={track.id} className="flex-none w-40 md:w-56 scroll-snap-align-start">
+                        <div key={track.id} className="flex-none w-36 md:w-56 scroll-snap-align-start">
                             <SongCard
                                 item={track}
                                 onPlay={(t) => playItem(t, charts)}
@@ -199,17 +199,17 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
             </section>
 
             {/* Section E: Moods & Genres (Gradient Grid) */}
-            <section className="px-6 md:px-12 flex flex-col gap-8">
-                <h2 className="text-3xl font-bold text-white tracking-tight">Moods & Genres</h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6">
+            <section className="px-6 md:px-12 flex flex-col gap-6 md:gap-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Moods & Genres</h2>
+                <div className="grid grid-cols-2 md:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 md:gap-6">
                     {genres.map((genre, idx) => (
                         <div
                             key={genre.id}
-                            className={`group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${getGenreGradient(idx)}`}
+                            className={`group relative h-24 md:aspect-[4/3] md:h-auto rounded-xl md:rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${getGenreGradient(idx)}`}
                         >
                             {/* Optional: Add subtle texture or pattern here */}
-                            <div className="absolute inset-0 flex items-center justify-center p-4">
-                                <h3 className="text-2xl font-black text-white text-center drop-shadow-md transform group-hover:scale-110 transition-transform">
+                            <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
+                                <h3 className="text-lg md:text-2xl font-black text-white text-center drop-shadow-md transform group-hover:scale-110 transition-transform">
                                     {genre.name}
                                 </h3>
                             </div>

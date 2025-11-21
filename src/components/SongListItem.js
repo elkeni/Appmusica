@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play } from 'lucide-react';
+import { Play, Heart } from 'lucide-react';
 
 export default function SongListItem({ item, index, onPlay, onFavorite, onAddPlaylist, onGoToAlbum, onRemoveFromPlaylist, isFavorite, isInPlaylist }) {
     const getThumbnail = () => {
@@ -14,7 +14,7 @@ export default function SongListItem({ item, index, onPlay, onFavorite, onAddPla
 
     const getTitle = () => item?.title || item?.snippet?.title || 'Canción sin título';
     const getArtist = () => item?.artist || item?.snippet?.channelTitle || 'Artista desconocido';
-    
+
     const getDuration = () => {
         if (item?.duration) {
             const seconds = item.duration % 60;
@@ -42,6 +42,18 @@ export default function SongListItem({ item, index, onPlay, onFavorite, onAddPla
                 <h4 className="text-white font-medium text-sm md:text-base truncate group-hover:text-purple-300 transition-colors">{getTitle()}</h4>
                 <p className="text-slate-400 text-xs truncate">{getArtist()}</p>
             </div>
+
+            {onFavorite && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onFavorite(item);
+                    }}
+                    className={`p-2 rounded-full transition-colors ${isFavorite ? 'text-green-500' : 'text-slate-500 hover:text-white opacity-0 group-hover:opacity-100'}`}
+                >
+                    <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+                </button>
+            )}
 
             <span className="text-slate-500 text-xs md:text-sm font-medium w-10 md:w-12 text-right">
                 {getDuration()}
