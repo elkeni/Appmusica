@@ -31,7 +31,7 @@ export async function fetchLyrics(trackName, artistName, albumName, duration) {
             if (response.data) return response.data;
         } catch (e) {
             // If 404 or error, fall back to search
-            console.log("Direct lyrics fetch failed, trying search...");
+            console.debug && console.debug("Direct lyrics fetch failed, trying search...");
         }
 
         // Fallback to search

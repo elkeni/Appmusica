@@ -244,6 +244,112 @@ export const getYouTubeVideoForTrack = async (track, apiKey) => {
     }
 };
 
+/**
+ * Search YouTube with type-specific filtering  
+ * @param {string} query - Search query
+ * @param {string} type - 'song', 'video', or 'all'
+ * @param {string} apiKey - YouTube API key
+ * @param {number} maxResults - Number of results to return
+ */
+export const searchYouTubeByType = async (query, type = 'all', apiKey, maxResults = 20) => {
+    try {
+        if (!apiKey) {
+            console.warn('YouTube API key is missing.');
+            return [];
+        }
+
+        let searchQuery = query;
+        let params = {
+            part: 'snippet',
+            q: searchQuery,
+            type: 'video',
+            maxResults: maxResults,
+            videoCategoryId: '10', // Music category
+            key: apiKey
+        };
+
+        // Type-specific modifications
+        if (type === 'song') {
+            params.q = `${query} official audio`;
+        } else if (type === 'video') {
+            params.q = `${query} official music video`;
+        }
+
+        const response = await axios.get(`${YOUTUBE_API}/search`, { params });
+
+        if (!response.data.items) return [];
+
+        let results = response.data.items;
+
+        // For video type, filter out Topic channels
+        if (type === 'video') {
+            results = results.filter(item => {
+                const channelTitle = item.snippet.channelTitle || '';
+                return !channelTitle.includes('Topic') && !channelTitle.includes(' - Topic');
+            });
+        }
+
+        return results.map(item => ({
+            id: item.id.videoId,
+            videoId: item.id.videoId,
+            title: item.snippet.title,
+            artist: item.snippet.channelTitle,
+            image: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
+            thumbnail: item.snippet.thumbnails?.default?.url,
+            description: item.snippet.description,
+            publishedAt: item.snippet.publishedAt,
+            channelId: item.snippet.channelId,
+            type: 'youtube',
+            snippet: item.snippet
+        }));
+    } catch (error) {
+        console.error('YouTube search by type error:', error);
+        return [];
+    }
+};
+
+/**
+ * Get recommendations based on user's play history
+ * Uses YouTube's relatedToVideoId endpoint
+ */
+export const getRecommendationsBasedOnHistory = async (userHistory, apiKey, limit = 20) => {
+    try {
+        if (!apiKey || !userHistory || userHistory.length === 0) {
+            return [];
+        }
+
+        const lastVideoId = userHistory[0]?.videoId || userHistory[0]?.id;
+        if (!lastVideoId) return [];
+
+        const response = await axios.get(`${YOUTUBE_API}/search`, {
+            params: {
+                part: 'snippet',
+                relatedToVideoId: lastVideoId,
+                type: 'video',
+                maxResults: limit,
+                videoCategoryId: '10',
+                key: apiKey
+            }
+        });
+
+        if (!response.data.items) return [];
+
+        return response.data.items.map(item => ({
+            id: item.id.videoId,
+            videoId: item.id.videoId,
+            title: item.snippet.title,
+            artist: item.snippet.channelTitle,
+            image: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
+            thumbnail: item.snippet.thumbnails?.default?.url,
+            type: 'youtube',
+            snippet: item.snippet
+        }));
+    } catch (error) {
+        console.error('Get recommendations based on history error:', error);
+        return [];
+    }
+};
+
 // ==================== FORMATTERS ====================
 
 function formatDeezerTrack(track) {

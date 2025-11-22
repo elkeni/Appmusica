@@ -1,14 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import { Music } from 'lucide-react';
 
-export default function LyricsView({ lyrics, currentTime, isLoading, error }) {
+export default function LyricsView({ lyrics = [], currentTime = 0, isLoading = false, error = null }) {
     const containerRef = useRef(null);
     const activeLineRef = useRef(null);
 
-    // Find active line index
-    const activeIndex = lyrics.findIndex((line, index) => {
-        const nextLine = lyrics[index + 1];
-        return currentTime >= line.time && (!nextLine || currentTime < nextLine.time);
+    const safeLyrics = Array.isArray(lyrics) ? lyrics : [];
+
+    // Find active line index (defensive)
+    const activeIndex = safeLyrics.length === 0 ? -1 : safeLyrics.findIndex((line, index) => {
+        const nextLine = safeLyrics[index + 1];
+        return Number(currentTime) >= Number(line?.time) && (!nextLine || Number(currentTime) < Number(nextLine?.time));
     });
 
     // Auto-scroll to active line
@@ -30,7 +32,7 @@ export default function LyricsView({ lyrics, currentTime, isLoading, error }) {
         );
     }
 
-    if (error || !lyrics || lyrics.length === 0) {
+    if (error || safeLyrics.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-slate-500">
                 <Music size={48} className="mb-4 opacity-20" />
@@ -45,7 +47,7 @@ export default function LyricsView({ lyrics, currentTime, isLoading, error }) {
             className="h-full overflow-y-auto px-6 py-10 custom-scrollbar scroll-smooth"
         >
             <div className="flex flex-col gap-6 text-center">
-                {lyrics.map((line, index) => {
+                {safeLyrics.map((line, index) => {
                     const isActive = index === activeIndex;
                     return (
                         <p

@@ -19,6 +19,7 @@ export const PlayerProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [waveformBaseline, setWaveformBaseline] = useState([]);
+    const [playbackMode, setPlaybackMode] = useState('audio'); // 'audio' or 'video'
 
     const playerRef = useRef(null);
     const ytPlayerRef = useRef(null);
@@ -83,7 +84,14 @@ export const PlayerProvider = ({ children }) => {
             const tag = document.createElement('script');
             tag.src = 'https://www.youtube.com/iframe_api';
             const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            if (firstScriptTag && firstScriptTag.parentNode) {
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            } else if (document.head) {
+                document.head.appendChild(tag);
+            } else {
+                // last resort
+                document.body.appendChild(tag);
+            }
             window.onYouTubeIframeAPIReady = () => resolve();
         });
 
@@ -183,12 +191,58 @@ export const PlayerProvider = ({ children }) => {
 
     const playItem = useCallback(async (item, context = null) => {
         try {
+            //OPTIMIZATION: Skip API call if track already has video ID
+            const existingVideoId = item?.id?.videoId || item?.videoId || item?.youtubeId;
+            if (existingVideoId) {
+                console.debug && console.debug(`⚡ Fast path: Track already has videoId ${existingVideoId}`);
+                const trackData = {
+                    id: existingVideoId,
+                    title: item.snippet?.title || item.title || 'Desconocido',
+                    artist: item.artist || item.snippet?.channelTitle || 'Desconocido',
+                    image: item.snippet?.thumbnails?.high?.url || item.image || item.cover || item.coverBig || '',
+                    url: `https://www.youtube.com/watch?v=${existingVideoId}`,
+                    type: item.type || 'youtube',
+                    originalData: item,
+                };
+                setCurrentTrack(trackData);
+                setIsPlaying(true);
+                setHistory(prev => [trackData, ...prev.filter(t => t.id !== trackData.id)].slice(0, 20));
+
+                // Queue logic handled below
+                const isContextArray = Array.isArray(context);
+                const isContextObjectWithItems = context && typeof context === 'object' && Array.isArray(context.items);
+                if (isContextArray || isContextObjectWithItems) {
+                    const items = isContextArray ? context : context.items;
+                    const targetId = getItemId(item);
+                    const index = items.findIndex(t => {
+                        const tId = getItemId(t);
+                        return String(tId) === String(targetId) ||
+                            (t.providerId && String(t.providerId) === String(targetId)) ||
+                            (item.providerId && String(tId) === String(item.providerId));
+                    });
+                    if (index !== -1) {
+                        setQueue(items.slice(index + 1));
+                        setPlaybackContext({ type: 'COLLECTION', id: context?.id || 'list' });
+                    } else {
+                        setQueue([]);
+                    }
+                } else if (context === 'KEEP') {
+                    // Keep existing queue
+                } else {
+                    setQueue([]);
+                    setPlaybackContext({ type: 'AUTOPLAY' });
+                    getSimilarTracks(item, 10).then(similar => setQueue(similar));
+                }
+                return;
+            }
+
             const isDeezer = item?.deezerId || (item?.id && !item?.id?.videoId && !item?.videoId);
             let videoId;
             let trackData;
 
             if (isDeezer) {
                 setLoading(true);
+                setError(null); // Clear previous errors
                 const cacheKey = `yt_${item.deezerId || item.id}`;
                 const cached = localStorage.getItem(cacheKey);
 
@@ -197,11 +251,32 @@ export const PlayerProvider = ({ children }) => {
                 } else {
                     const ytApiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
                     const result = await getYouTubeVideoForTrack(item, ytApiKey);
+
+                    // Handle all cases including fallback mode
                     if (result && result.youtubeId) {
                         videoId = result.youtubeId;
-                        localStorage.setItem(cacheKey, videoId);
+
+                        // Only cache real results, not fallback IDs
+                        if (!result.fallbackMode) {
+                            localStorage.setItem(cacheKey, videoId);
+                        }
+
+                        // Show user-friendly message if in fallback mode
+                        if (result.fallbackMode) {
+                            if (result.error === 'QUOTA_EXCEEDED') {
+                                setError('⚠️ Límite de API alcanzado. Reproduciendo canción de prueba.');
+                                console.warn('🎵 Fallback Mode: API quota exceeded,playing test track');
+                            } else if (result.error === 'NOT_FOUND') {
+                                setError(`⚠️ "${item.title}" no encontrada. Reproduciendo canción alternativa.`);
+                            } else {
+                                setError('⚠️ Modo de prueba activado.');
+                            }
+                            // Clear error after 5 seconds
+                            setTimeout(() => setError(null), 5000);
+                        }
                     } else {
-                        setError(`No se encontró video para "${item.title}" de ${item.artist}`);
+                        // This should never happen with fallback, but keep as safety
+                        setError(`No se pudo cargar "${item.title}"`);
                         setLoading(false);
                         return;
                     }
@@ -210,6 +285,7 @@ export const PlayerProvider = ({ children }) => {
                 trackData = {
                     id: videoId,
                     title: item.title || 'Desconocido',
+                    artist: item.artist || 'Desconocido',
                     image: item.coverBig || item.cover || item.image || '',
                     url: `https://www.youtube.com/watch?v=${videoId}`,
                     type: 'hybrid',
@@ -225,6 +301,7 @@ export const PlayerProvider = ({ children }) => {
                 trackData = {
                     id: videoId,
                     title: item.snippet?.title || item.title || 'Desconocido',
+                    artist: item.artist || item.snippet?.channelTitle || 'Desconocido',
                     image: item.snippet?.thumbnails?.high?.url || item.image || '',
                     url: `https://www.youtube.com/watch?v=${videoId}`,
                     type: 'youtube',
@@ -233,10 +310,6 @@ export const PlayerProvider = ({ children }) => {
             }
 
             setCurrentTrack(trackData);
-            // Mark playing intention; the Player Controls Sync effect and
-            // YT onReady will handle calling the player's play method when
-            // the player is ready. This avoids calling play() directly here
-            // and prevents race conditions that cause flicker/auto-resume.
             setIsPlaying(true);
 
             setHistory(prev => [trackData, ...prev.filter(t => t.id !== trackData.id)].slice(0, 20));
@@ -370,7 +443,9 @@ export const PlayerProvider = ({ children }) => {
         prevTrack: handlePrevTrack,
         playerRef,
         loading,
-        error
+        error,
+        playbackMode,
+        setPlaybackMode
     };
 
     return (

@@ -194,7 +194,7 @@ export const generatePersonalizedRecommendations = async (
 ) => {
   try {
     // Step 1: Fetch user's YouTube liked videos
-    console.log('Fetching YouTube liked videos...');
+    console.debug && console.debug('Fetching YouTube liked videos...');
     const likedVideos = await fetchYouTubeLikedVideos(auth, options.maxYouTubeVideos);
 
     if (likedVideos.length === 0) {
@@ -208,9 +208,9 @@ export const generatePersonalizedRecommendations = async (
     }
 
     // Step 2: Extract artist names
-    console.log('Extracting artist names from videos...');
+    console.debug && console.debug('Extracting artist names from videos...');
     const artists = extractArtistsFromVideos(likedVideos);
-    console.log(`Found ${artists.length} unique artists:`, artists);
+    console.debug && console.debug(`Found ${artists.length} unique artists:`, artists);
 
     if (artists.length === 0) {
       console.warn('Could not extract any artists from YouTube videos');
@@ -223,7 +223,7 @@ export const generatePersonalizedRecommendations = async (
     }
 
     // Step 3: Generate recommendations for each category
-    console.log('Generating recommendations...');
+    console.debug && console.debug('Generating recommendations...');
     const [highlighted, newReleases, recent] = await Promise.all([
       getRecommendationsFromArtists(artists, 'highlighted', options.recommendationsPerCategory),
       getRecommendationsFromArtists(artists, 'new', options.recommendationsPerCategory),

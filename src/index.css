@@ -1,5 +1,5 @@
-/* Import Modern Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* Import Modern Google Font - Roboto for YouTube Music Aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -133,6 +133,14 @@
     /* Shadows */
     --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
     --shadow-glow-strong: 0 0 40px rgba(139, 92, 246, 0.5);
+
+    /* YouTube Music Theme - Pure Black */
+    --yt-black: #000000;
+    --yt-spec-base-background: #0f0f0f;
+    --yt-chip-bg: rgba(255, 255, 255, 0.1);
+    --yt-chip-bg-hover: rgba(255, 255, 255, 0.2);
+    --yt-chip-active-bg: #ffffff;
+    --yt-chip-active-text: #000000;
   }
 
   /* Hide scrollbar while maintaining scroll functionality */
@@ -142,6 +150,15 @@
   }
 
   .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
