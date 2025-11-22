@@ -53,3 +53,91 @@ export async function fetchLyrics(trackName, artistName, albumName, duration) {
         return null;
     }
 }
+
+/**
+ * Get synced lyrics with automatic parsing
+ * @param {string} trackName 
+ * @param {string} artistName 
+ * @param {number} duration Duration in seconds
+ * @returns {Promise<Array<{time: number, text: string}>>}
+ */
+export async function getSyncedLyrics(trackName, artistName, duration) {
+    try {
+        const data = await fetchLyrics(trackName, artistName, '', duration);
+        
+        if (!data) {
+            return { lyrics: [], isInstrumental: false, error: 'No lyrics found' };
+        }
+
+        // Check if instrumental
+        if (data.instrumental === true) {
+            return { lyrics: [], isInstrumental: true, error: null };
+        }
+
+        // Parse synced lyrics if available
+        if (data.syncedLyrics) {
+            const parsed = parseLRC(data.syncedLyrics);
+            return { lyrics: parsed, isInstrumental: false, error: null };
+        }
+
+        // Fallback to plain lyrics (convert to single timed entry)
+        if (data.plainLyrics) {
+            const plainLines = data.plainLyrics.split('\n').filter(line => line.trim());
+            const parsed = plainLines.map((text, index) => ({
+                time: index * 3, // Rough spacing of 3 seconds per line
+                text: text.trim()
+            }));
+            return { lyrics: parsed, isInstrumental: false, error: null };
+        }
+
+        return { lyrics: [], isInstrumental: false, error: 'No lyrics available' };
+    } catch (error) {
+        console.error('getSyncedLyrics error:', error);
+        return { lyrics: [], isInstrumental: false, error: error.message };
+    }
+}
+
+/**
+ * Parse LRC format to structured lyrics
+ * @param {string} lrcString 
+ * @returns {Array<{time: number, text: string}>}
+ */
+function parseLRC(lrcString) {
+    if (!lrcString) return [];
+
+    const lines = lrcString.split('\n');
+    const lyrics = [];
+    const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/g;
+
+    for (const line of lines) {
+        let match;
+        const matches = [];
+        
+        // Find all timestamps in the line
+        while ((match = timeRegex.exec(line)) !== null) {
+            matches.push(match);
+        }
+
+        if (matches.length > 0) {
+            // Get the text after all timestamps
+            const text = line.replace(/\[\d{2}:\d{2}\.\d{2,3}\]/g, '').trim();
+            
+            if (text) {
+                // Add entry for each timestamp (some lines have multiple timestamps)
+                matches.forEach(match => {
+                    const minutes = parseInt(match[1], 10);
+                    const seconds = parseInt(match[2], 10);
+                    const milliseconds = parseInt(match[3], 10);
+                    
+                    // Convert to total seconds
+                    const time = minutes * 60 + seconds + (milliseconds / (match[3].length === 2 ? 100 : 1000));
+                    
+                    lyrics.push({ time, text });
+                });
+            }
+        }
+    }
+
+    // Sort by time
+    return lyrics.sort((a, b) => a.time - b.time);
+}

@@ -34,7 +34,7 @@ export default function AlbumDetail({ favorites, toggleFavorite, onAddPlaylist }
     if (!album) return <div className="text-center text-slate-400 mt-20">Álbum no encontrado</div>;
 
     return (
-        <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-8 pb-24">
+        <div className="p-4 md:p-8 pb-24">
             <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
                 <span>← Volver</span>
             </button>

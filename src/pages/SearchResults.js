@@ -113,7 +113,7 @@ export default function SearchResults({ favorites, toggleFavorite, onAddPlaylist
     };
 
     return (
-        <div className="h-full bg-black overflow-y-auto custom-scrollbar">
+        <div className="bg-black">
             {/* Filter Tabs */}
             <SearchFilterTabs activeFilter={activeFilter} onFilterChange={handleFilterChange} />
 

@@ -190,57 +190,102 @@ export const getGenrePlaylists = async (genreId) => {
 // ==================== YOUTUBE API (Solo para reproducción) ====================
 
 /**
- * Buscar video de YouTube basado en datos de Deezer
+ * PHASE 3: Buscar video de YouTube con query optimizado y filtrado
+ * Mejoras: Filtrar covers/remixes, mejor query string, manejo de errores robusto
  */
 export const getYouTubeVideoForTrack = async (track, apiKey) => {
     try {
         // Require API key
         if (!apiKey) {
-            console.warn('YouTube API key is missing. Skipping YouTube lookup.');
-            return null;
-        }
-
-        // Crear query de búsqueda optimizada
-        const searchQuery = `${track.title} ${track.artist} official audio`;
-
-        // Verificar caché primero
-        const cacheKey = `${track.artist}-${track.title}`;
-        if (youtubeCache.has(cacheKey)) {
+            console.warn('YouTube API key is missing. Using fallback mode.');
+            // Return a fallback video ID for testing
             return {
-                ...track,
-                youtubeId: youtubeCache.get(cacheKey)
+                youtubeId: 'jNQXAC9IVRw', // "Me Gustas Tu" - Fallback video
+                fallbackMode: true,
+                error: 'NO_API_KEY'
             };
         }
 
-        // Buscar en YouTube
+        // PHASE 3: Crear query de búsqueda optimizada - Más estricto
+        // Priorizar "official audio" sobre "official video" para mejor sincronización
+        const searchQuery = `"${track.title}" "${track.artist}" official audio`;
+
+        // Verificar caché primero
+        const cacheKey = `${track.artist}-${track.title}`.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (youtubeCache.has(cacheKey)) {
+            return {
+                ...track,
+                youtubeId: youtubeCache.get(cacheKey),
+                cached: true
+            };
+        }
+
+        // Buscar en YouTube con manejo de cuota
         const response = await axios.get(`${YOUTUBE_API}/search`, {
             params: {
                 part: 'snippet',
                 q: searchQuery,
                 type: 'video',
-                maxResults: 1,
+                maxResults: 5, // Aumentar para filtrar mejor
                 videoCategoryId: '10', // Categoría Música
+                videoEmbeddable: 'true', // Solo videos embebibles
                 key: apiKey
             }
         });
 
         if (response.data.items && response.data.items.length > 0) {
-            const videoId = response.data.items[0].id.videoId;
+            // PHASE 3: Filtrar resultados no deseados
+            const filteredResults = response.data.items.filter(item => {
+                const title = item.snippet.title.toLowerCase();
+                // Excluir covers, remixes, live versions (a menos que sea el original)
+                const excludeKeywords = ['cover', 'remix', 'live', 'karaoke', 'instrumental', 'acoustic'];
+                const hasExcluded = excludeKeywords.some(keyword => 
+                    title.includes(keyword) && !title.includes('official')
+                );
+                return !hasExcluded;
+            });
+
+            const bestMatch = filteredResults.length > 0 ? filteredResults[0] : response.data.items[0];
+            const videoId = bestMatch.id.videoId;
 
             // Guardar en caché
             youtubeCache.set(cacheKey, videoId);
 
+            console.log(`✅ YouTube match found: ${bestMatch.snippet.title}`);
+
             return {
                 ...track,
-                youtubeId: videoId
+                youtubeId: videoId,
+                videoTitle: bestMatch.snippet.title
             };
         }
 
-        console.warn('No YouTube video found for:', searchQuery);
-        return null;
+        console.warn('⚠️ No YouTube video found for:', searchQuery);
+        // Return fallback instead of null
+        return {
+            youtubeId: 'jNQXAC9IVRw',
+            fallbackMode: true,
+            error: 'NOT_FOUND'
+        };
     } catch (error) {
-        console.error('YouTube search error:', error);
-        return null;
+        console.error('❌ YouTube search error:', error);
+        
+        // PHASE 3: Error handling - Detect quota exceeded
+        if (error.response?.status === 403 || error.response?.data?.error?.errors?.[0]?.reason === 'quotaExceeded') {
+            console.warn('⚠️ YouTube API quota exceeded. Using fallback.');
+            return {
+                youtubeId: 'jNQXAC9IVRw',
+                fallbackMode: true,
+                error: 'QUOTA_EXCEEDED'
+            };
+        }
+
+        // Return fallback for any error
+        return {
+            youtubeId: 'jNQXAC9IVRw',
+            fallbackMode: true,
+            error: error.message || 'UNKNOWN_ERROR'
+        };
     }
 };
 

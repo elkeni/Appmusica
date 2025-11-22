@@ -1,63 +1,106 @@
-/* Import Modern Google Font - Roboto for YouTube Music Aesthetic */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/* ========================================
+   IMPORTAR FUENTES
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- ESTILOS BASE GLOBALES --- */
-@layer base {
-
-  /* Premium dark background with sophisticated gradient */
-  body {
-    color: #f8f9fa;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, var(--gradient-start, #0a0e1a), var(--gradient-mid, #1a1428), var(--gradient-end, #0d0a1f));
-    background-attachment: fixed;
-    scroll-behavior: smooth;
-    font-weight: 400;
-    letter-spacing: -0.011em;
-  }
-
-  /* Rich selection color with purple accent */
-  ::selection {
-    background: var(--selection, rgba(139, 92, 246, 0.3));
-    color: white;
-  }
-
-  /* Enhanced typography with better spacing */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-bold tracking-tight;
-    background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    line-height: 1.2;
-  }
-
-  h2 {
-    font-size: 2rem;
-    line-height: 1.3;
-  }
-
-  h3 {
-    font-size: 1.5rem;
-    line-height: 1.4;
-  }
+/* ========================================
+   RESET & VARIABLES CSS
+   ======================================== */
+:root {
+  /* Paleta YTM - Modo Oscuro */
+  --ytm-base: #030303;
+  --ytm-surface-1: rgba(24, 24, 24, 0.9);
+  --ytm-surface-2: #212121;
+  --ytm-text-primary: #ffffff;
+  --ytm-text-secondary: #aaaaaa;
+  --ytm-accent: #ff0000;
+  --ytm-hover: #303030;
+  
+  /* Otros */
+  --ytm-glass-blur: 12px;
+  --ytm-border-radius: 8px;
 }
 
-/* --- PREMIUM SCROLLBARS --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #030303;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  color: var(--ytm-text-primary);
+  line-height: 1.5;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   SCROLLBAR PERSONALIZADA (WebKit)
+   ======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555555;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #777777;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-color: #555555 transparent;
+  scrollbar-width: thin;
+}
+
+/* ========================================
+   TIPOGRAFÍA & HEADINGS
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p {
+  color: var(--ytm-text-secondary);
+  font-weight: 400;
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -160,6 +203,29 @@
 
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Custom scrollbar visible but styled */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 15, 24, 0.4);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.6), rgba(99, 102, 241, 0.6));
+    border-radius: 10px;
+    border: 2px solid rgba(15, 15, 24, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
   }
 
   /* Enhanced Glass Effects */
@@ -389,9 +455,88 @@
     background-clip: text;
   }
 
+  /* Background Gradients */
+  .accent-gradient {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+    transition: all 0.3s ease;
+  }
+
+  .accent-gradient:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #0891b2 100%);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+
   /* Smooth Transitions */
   * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
   }
 
   /* --- LAYOUT GRID --- */

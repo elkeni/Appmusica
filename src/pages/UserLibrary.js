@@ -148,7 +148,7 @@ export default function UserLibrary({ userPlaylists, setUserPlaylists, saveUserP
     }
 
     return (
-        <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-8 pb-24">
+        <div className="p-4 md:p-8 pb-24">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-white">Mis Playlists</h3>
                 <button

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
-import { getYouTubeVideoForTrack, getSimilarTracks } from '../services/hybridMusicService';
+import { getYouTubeVideoForTrack, getSimilarTracks, getDeezerCharts, getRecommendationsBasedOnHistory, searchDeezer } from '../services/hybridMusicService';
 import { getItemId } from '../utils/formatUtils';
 import { extractPaletteFromImage, darkenHex } from '../utils/colorUtils';
 
@@ -20,6 +20,8 @@ export const PlayerProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [waveformBaseline, setWaveformBaseline] = useState([]);
     const [playbackMode, setPlaybackMode] = useState('audio'); // 'audio' or 'video'
+    const [radioMode, setRadioMode] = useState(false); // Indicates when Infinite Radio Mode is active
+    const [fetchingRecommendations, setFetchingRecommendations] = useState(false); // Loading state for radio
 
     const playerRef = useRef(null);
     const ytPlayerRef = useRef(null);
@@ -168,10 +170,29 @@ export const PlayerProvider = ({ children }) => {
         };
     }, [currentTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // When a new track is set, we rely on `setIsPlaying(true)` from `playItem`,
-    // the YT player's `onReady` handler, and the `Player Controls Sync` effect
-    // below to perform the actual play. Removing an extra effect that forced
-    // autoplay prevents race conditions where re-renders could auto-resume playback.
+    // CRITICAL FIX: Force autoplay when track changes (Phase 1)
+    useEffect(() => {
+        if (currentTrack && currentTrack.id && ytPlayerRef.current) {
+            // Small delay to ensure player is ready
+            const timer = setTimeout(() => {
+                try {
+                    if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === 'function') {
+                        const playPromise = ytPlayerRef.current.playVideo();
+                        if (playPromise && playPromise.catch) {
+                            playPromise.catch(error => {
+                                console.warn('⚠️ Autoplay blocked by browser:', error);
+                                // Show toast or notification here if needed
+                            });
+                        }
+                        setIsPlaying(true); // Ensure state is synced
+                    }
+                } catch (err) {
+                    console.warn('Autoplay error:', err);
+                }
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [currentTrack?.id]);
 
     // Player Controls Sync
     useEffect(() => {
@@ -186,6 +207,25 @@ export const PlayerProvider = ({ children }) => {
             }
         } catch (err) { }
     }, [isPlaying, volume]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Pre-cache recommendations when queue is running low (Performance optimization)
+    useEffect(() => {
+        const shouldPreload = queue.length <= 2 && queue.length > 0 && currentTrack && playbackContext?.type === 'AUTOPLAY';
+        
+        if (shouldPreload && !fetchingRecommendations) {
+            console.log('🔄 Pre-loading recommendations (queue running low)...');
+            const sourceTrack = currentTrack?.originalData || currentTrack;
+            
+            getSimilarTracks(sourceTrack, 10)
+                .then(similar => {
+                    if (similar && similar.length > 0) {
+                        console.log(`✅ Pre-loaded ${similar.length} tracks`);
+                        setQueue(prev => [...prev, ...similar]);
+                    }
+                })
+                .catch(err => console.warn('Pre-load failed:', err));
+        }
+    }, [queue.length, currentTrack, playbackContext, fetchingRecommendations]);
 
     // Media Session API is attached later after handler functions are defined.
 
@@ -223,14 +263,16 @@ export const PlayerProvider = ({ children }) => {
                     if (index !== -1) {
                         setQueue(items.slice(index + 1));
                         setPlaybackContext({ type: 'COLLECTION', id: context?.id || 'list' });
+                        setRadioMode(false); // Clear radio mode when playing from a collection
                     } else {
                         setQueue([]);
                     }
                 } else if (context === 'KEEP') {
-                    // Keep existing queue
+                    // Keep existing queue - radio mode state remains unchanged
                 } else {
                     setQueue([]);
                     setPlaybackContext({ type: 'AUTOPLAY' });
+                    setRadioMode(false); // Will activate later if needed
                     getSimilarTracks(item, 10).then(similar => setQueue(similar));
                 }
                 return;
@@ -358,25 +400,121 @@ export const PlayerProvider = ({ children }) => {
         if (queue.length > 0) {
             const nextTrack = queue[0];
             setQueue(prev => prev.slice(1));
+            setRadioMode(false); // Clear radio mode when playing from queue
             await playItem(nextTrack, 'KEEP');
-        } else if (playbackContext?.type === 'AUTOPLAY' && currentTrack) {
+        } else {
+            // PHASE 2: INFINITE RADIO MODE - Never stop the music!
+            console.log('🎵 Queue ended. Activating Infinite Radio Mode...');
+            setRadioMode(true);
+            setFetchingRecommendations(true);
+            
             try {
-                const similar = await getSimilarTracks(currentTrack.originalData || currentTrack, 5);
-                if (similar.length > 0) {
-                    const next = similar[0];
-                    setQueue(similar.slice(1));
+                const sourceTrack = currentTrack?.originalData || currentTrack;
+                if (!sourceTrack) {
+                    console.warn('No current track for recommendations');
+                    setIsPlaying(false);
+                    setRadioMode(false);
+                    setFetchingRecommendations(false);
+                    return;
+                }
+
+                let recommendations = [];
+                
+                // STRATEGY 1: YouTube Related Videos (Best quality recommendations)
+                if (currentTrack?.videoId && history.length > 0) {
+                    try {
+                        console.log('🎯 Strategy 1: Trying YouTube related videos...');
+                        const ytApiKey = process.env.REACT_APP_YOUTUBE_API_KEY;
+                        const ytRecs = await getRecommendationsBasedOnHistory(history, ytApiKey, 15);
+                        
+                        if (ytRecs && ytRecs.length > 0) {
+                            console.log(`✅ Found ${ytRecs.length} YouTube recommendations`);
+                            recommendations = ytRecs;
+                        }
+                    } catch (e) {
+                        console.warn('YouTube recommendations failed:', e.message);
+                    }
+                }
+
+                // STRATEGY 2: Deezer Similar Tracks (Artist + Genre based)
+                if (recommendations.length === 0) {
+                    try {
+                        console.log('🎯 Strategy 2: Trying Deezer similar tracks...');
+                        const similar = await getSimilarTracks(sourceTrack, 12);
+                        
+                        if (similar && similar.length > 0) {
+                            console.log(`✅ Found ${similar.length} similar Deezer tracks`);
+                            recommendations = similar;
+                        }
+                    } catch (e) {
+                        console.warn('Deezer similar tracks failed:', e.message);
+                    }
+                }
+
+                // STRATEGY 3: Search by Artist (If we know the artist)
+                if (recommendations.length === 0 && sourceTrack.artist) {
+                    try {
+                        console.log('🎯 Strategy 3: Searching by artist...');
+                        const artistTracks = await searchDeezer(sourceTrack.artist, 'artist', 10);
+                        
+                        if (artistTracks && artistTracks.length > 0) {
+                            console.log(`✅ Found ${artistTracks.length} tracks by ${sourceTrack.artist}`);
+                            recommendations = artistTracks;
+                        }
+                    } catch (e) {
+                        console.warn('Artist search failed:', e.message);
+                    }
+                }
+
+                // STRATEGY 4: Top Charts (Last resort fallback)
+                if (recommendations.length === 0) {
+                    try {
+                        console.log('🎯 Strategy 4: Fallback to top charts...');
+                        const charts = await getDeezerCharts(15);
+                        
+                        if (charts && charts.length > 0) {
+                            console.log(`✅ Loaded ${charts.length} chart tracks`);
+                            recommendations = charts;
+                        }
+                    } catch (e) {
+                        console.error('Charts fallback failed:', e.message);
+                    }
+                }
+
+                // Play recommendations if found
+                if (recommendations.length > 0) {
+                    // Filter out tracks we've already played recently
+                    const recentIds = history.slice(0, 5).map(t => t.id || t.videoId);
+                    const filtered = recommendations.filter(r => !recentIds.includes(r.id || r.videoId));
+                    
+                    const tracksToUse = filtered.length > 0 ? filtered : recommendations;
+                    const next = tracksToUse[0];
+                    
+                    // Add remaining tracks to queue
+                    setQueue(tracksToUse.slice(1));
+                    
+                    // Set context to AUTOPLAY for continuous radio
+                    setPlaybackContext({ type: 'AUTOPLAY', source: 'radio' });
+                    
+                    setFetchingRecommendations(false);
+                    
+                    // Play next track immediately
+                    console.log(`🎵 Playing: ${next.title} by ${next.artist}`);
                     await playItem(next, 'KEEP');
                 } else {
+                    console.error('❌ All recommendation strategies failed - stopping playback');
                     setIsPlaying(false);
+                    setRadioMode(false);
+                    setFetchingRecommendations(false);
                 }
             } catch (e) {
-                console.error('Autoplay error:', e);
+                console.error('❌ Infinite Radio critical error:', e);
                 setIsPlaying(false);
+                setRadioMode(false);
+                setFetchingRecommendations(false);
             }
-        } else {
-            setIsPlaying(false);
         }
-    }, [queue, playbackContext, currentTrack, playItem]);
+    }, [queue, currentTrack, history, playItem]);
 
     const handlePrevTrack = useCallback(() => {
         // Basic implementation - ideally should go to history
@@ -426,6 +564,17 @@ export const PlayerProvider = ({ children }) => {
         setIsPlaying(prev => !prev);
     };
 
+    const seekTo = useCallback((time) => {
+        if (!ytPlayerRef.current || !duration) return;
+        try {
+            const seekTime = Math.max(0, Math.min(time, duration));
+            ytPlayerRef.current.seekTo(seekTime, true);
+            setCurrentTime(seekTime);
+        } catch (err) {
+            console.error('Seek error:', err);
+        }
+    }, [duration]);
+
     const value = {
         currentTrack,
         isPlaying,
@@ -441,11 +590,15 @@ export const PlayerProvider = ({ children }) => {
         togglePlayPause,
         nextTrack: handleNextTrack,
         prevTrack: handlePrevTrack,
+        seekTo,
         playerRef,
         loading,
         error,
         playbackMode,
-        setPlaybackMode
+        setPlaybackMode,
+        radioMode,
+        setRadioMode,
+        fetchingRecommendations
     };
 
     return (

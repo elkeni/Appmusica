@@ -1,286 +1,329 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from './firebase';
-
-// Context
 import { PlayerProvider } from './context/PlayerContext';
 
 // Components
 import Sidebar from './components/Sidebar';
 import PlayerBar from './components/PlayerBar';
-import NowPlayingModal from './components/NowPlayingModal';
+import BottomNav from './components/BottomNav';
 import Auth from './components/Auth';
+import Header from './components/Header';
+import NowPlayingModal from './components/NowPlayingModal';
 import AddToPlaylistModal from './components/AddToPlaylistModal';
 import MobileFullScreenPlayer from './components/MobileFullScreenPlayer';
-import RightPanel from './components/RightPanel';
-import Header from './components/Header';
-import BottomNav from './components/BottomNav';
 
 // Pages
-import HomeView from './pages/HomeView'; // New Apple Music-style home
+import HomeView from './pages/HomeView';
+import Search from './pages/Search';
 import SearchResults from './pages/SearchResults';
-import ArtistDetail from './pages/ArtistDetail';
-import AlbumDetail from './pages/AlbumDetail';
-import PlaylistDetail from './pages/PlaylistDetail';
-import UserLibrary from './pages/UserLibrary';
+import Radio from './pages/Radio';
 import Favorites from './pages/Favorites';
+import UserLibrary from './pages/UserLibrary';
+import PlaylistDetail from './pages/PlaylistDetail';
+import AlbumDetail from './pages/AlbumDetail';
+import ArtistDetail from './pages/ArtistDetail';
 
-// Utils
-import { getItemId } from './utils/formatUtils';
+// Styles
+import './index.css';
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    console.error('Error in child component:', error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div style={{ color: '#fff', padding: 20 }}>Componente falló</div>;
+    }
+    return this.props.children;
+  }
+}
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [playlist, setPlaylist] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  const [playlistModalOpen, setPlaylistModalOpen] = useState(false);
-  const [nowPlayingModalOpen, setNowPlayingModalOpen] = useState(false);
-  const [trackToAdd, setTrackToAdd] = useState(null);
+  
+  // Modal states
+  const [showNowPlaying, setShowNowPlaying] = useState(false);
+  const [showAddPlaylist, setShowAddPlaylist] = useState(false);
+  const [showMobilePlayer, setShowMobilePlayer] = useState(false);
+  const [itemToAdd, setItemToAdd] = useState(null);
 
-  // Auth & User Data Listener
+  // Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      
+      setAuthLoading(false);
+
       if (currentUser) {
-        // Generate avatar if not present
-        let photoURL = currentUser.photoURL;
-        if (!photoURL && currentUser.displayName) {
-          photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName)}&background=6366f1&color=fff&bold=true`;
-        }
-
-        // Store user data in localStorage for access in child components
-        localStorage.setItem('appmusica_user', JSON.stringify({
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
-          photoURL: photoURL
-        }));
-
-        // Load user data from Firestore
-        try {
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setFavorites(data.favorites || []);
-            setUserPlaylists(data.playlists || []);
-          } else {
-            // Initialize new user
-            await setDoc(userDocRef, {
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              photoURL: photoURL,
-              favorites: [],
-              playlists: [],
-              createdAt: new Date().toISOString()
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
+        await loadUserData(currentUser.uid);
       } else {
-        // Clear user data on logout
-        localStorage.removeItem('appmusica_user');
+        setPlaylist([]);
         setFavorites([]);
         setUserPlaylists([]);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
-  // Favorites Management
-  const toggleFavorite = async (track) => {
-    if (!user) return;
-    // Guard clause: Prevent Event objects or nulls
-    if (!track || track.nativeEvent || track.preventDefault) {
-      console.warn("Invalid track passed to toggleFavorite:", track);
-      return;
-    }
-    const trackId = getItemId(track);
-    const isFavorite = favorites.some(f => getItemId(f) === trackId);
-    const userRef = doc(db, 'users', user.uid);
-
+  // Load user data from Firestore
+  const loadUserData = async (uid) => {
     try {
-      if (isFavorite) {
-        const newFavorites = favorites.filter(f => getItemId(f) !== trackId);
-        setFavorites(newFavorites);
-        await updateDoc(userRef, { favorites: newFavorites }); // Updating entire array to be safe with object equality
+      const userDocRef = doc(db, 'users', uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setPlaylist(data.playlist || []);
+        setFavorites(data.favorites || []);
+        setUserPlaylists(data.playlists || []);
       } else {
-        const newFavorites = [...favorites, track];
-        setFavorites(newFavorites);
-        await updateDoc(userRef, { favorites: arrayUnion(track) });
+        // Create initial user document
+        await setDoc(userDocRef, {
+          email: auth.currentUser.email,
+          playlist: [],
+          favorites: [],
+          playlists: [],
+          createdAt: new Date().toISOString()
+        });
       }
     } catch (error) {
-      console.error("Error updating favorites:", error);
+      console.error('Error loading user data:', error);
     }
   };
 
-  // Playlist Management
-  const saveUserPlaylists = async (updatedPlaylists) => {
+  // Toggle favorite
+  const toggleFavorite = async (item) => {
     if (!user) return;
+
+    const itemId = item?.id || item?.stationuuid;
+    const exists = favorites.some(f => (f?.id || f?.stationuuid) === itemId);
+
     try {
-      await updateDoc(doc(db, 'users', user.uid), { playlists: updatedPlaylists });
+      const userDocRef = doc(db, 'users', user.uid);
+      
+      if (exists) {
+        const updatedFavorites = favorites.filter(f => (f?.id || f?.stationuuid) !== itemId);
+        setFavorites(updatedFavorites);
+        await updateDoc(userDocRef, { favorites: updatedFavorites });
+      } else {
+        const updatedFavorites = [...favorites, item];
+        setFavorites(updatedFavorites);
+        await updateDoc(userDocRef, { favorites: updatedFavorites });
+      }
     } catch (error) {
-      console.error("Error saving playlists:", error);
+      console.error('Error toggling favorite:', error);
     }
   };
 
-  const openAddToPlaylistModal = (track) => {
-    setTrackToAdd(track);
-    setPlaylistModalOpen(true);
+  // Add to playlist
+  const addToPlaylist = async (item) => {
+    if (!user) return;
+
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const updatedPlaylist = [...playlist, item];
+      setPlaylist(updatedPlaylist);
+      await updateDoc(userDocRef, { playlist: updatedPlaylist });
+    } catch (error) {
+      console.error('Error adding to playlist:', error);
+    }
   };
 
-  const handleAddToPlaylist = async (playlistId) => {
-    if (!trackToAdd) return;
+  // Remove from playlist
+  const removeFromPlaylist = async (item) => {
+    if (!user) return;
 
-    const updatedPlaylists = userPlaylists.map(p => {
-      if (p.id === playlistId) {
-        // Check if song already exists
-        if (p.songs && p.songs.some(s => getItemId(s) === getItemId(trackToAdd))) {
-          return p;
-        }
-
-        // Construct robust song object
-        const songToSave = {
-          id: getItemId(trackToAdd),
-          title: trackToAdd.title || 'Unknown Title',
-          artist: trackToAdd.artist || trackToAdd.originalData?.artist || trackToAdd.originalData?.creator?.name || 'Unknown Artist',
-          image: trackToAdd.image || trackToAdd.coverBig || trackToAdd.cover || '',
-          album: trackToAdd.album?.title || trackToAdd.originalData?.album?.title || '',
-          duration: trackToAdd.duration || 0,
-          providerId: trackToAdd.id, // Store original ID as providerId
-          addedAt: new Date().toISOString(),
-          originalData: trackToAdd.originalData || trackToAdd
-        };
-
-        return { ...p, songs: [...(p.songs || []), songToSave] };
-      }
-      return p;
-    });
-
-    setUserPlaylists(updatedPlaylists);
-    await saveUserPlaylists(updatedPlaylists);
-    setPlaylistModalOpen(false);
-    setTrackToAdd(null);
+    const itemId = item?.id || item?.stationuuid;
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const updatedPlaylist = playlist.filter(p => (p?.id || p?.stationuuid) !== itemId);
+      setPlaylist(updatedPlaylist);
+      await updateDoc(userDocRef, { playlist: updatedPlaylist });
+    } catch (error) {
+      console.error('Error removing from playlist:', error);
+    }
   };
 
-  const handleLogout = () => signOut(auth);
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      // Clear local state
+      setPlaylist([]);
+      setFavorites([]);
+      setUserPlaylists([]);
+      
+      // Sign out from Firebase
+      await auth.signOut();
+      
+      // Clear any localStorage items
+      localStorage.removeItem('appmusica_user');
+      
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Error al cerrar sesión. Por favor, intenta de nuevo.');
+    }
+  };
 
+  // Show loading screen
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-white text-lg">Cargando...</div>
+      </div>
+    );
+  }
+
+  // Show auth screen if not logged in
   if (!user) {
     return <Auth />;
   }
 
+  // Main app
   return (
-    <PlayerProvider>
-      <Router>
-        <div className="main-layout bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white font-sans selection:bg-purple-500/30">
+    <Router>
+      <PlayerProvider>
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+          {/* Desktop Layout */}
+          <div className="hidden md:flex flex-1 h-screen overflow-hidden">
+            {/* Sidebar */}
+            <ErrorBoundary fallback={<div className="w-64 bg-slate-900/50 p-4">Sidebar no disponible</div>}>
+              <div className="w-64 flex-shrink-0 h-full overflow-y-auto">
+                <Sidebar
+                  user={user}
+                  playlist={playlist}
+                  favorites={favorites}
+                  handleLogout={handleLogout}
+                />
+              </div>
+            </ErrorBoundary>
 
-          {/* Area: Nav */}
-          <div className="area-nav hidden md:block">
-            <Sidebar
-              user={user}
-              playlist={[]}
-              favorites={favorites}
-              handleLogout={handleLogout}
-            />
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col h-full overflow-hidden bg-slate-950">
+              <ErrorBoundary fallback={<div className="p-8 text-center">Error al cargar contenido</div>}>
+                <Header />
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <Routes>
+                  <Route path="/" element={<HomeView onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/search/results" element={<SearchResults onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                  <Route path="/radio" element={<Radio onToggleFavorite={toggleFavorite} favorites={favorites} />} />
+                  <Route path="/favorites" element={<Favorites favorites={favorites} onToggleFavorite={toggleFavorite} onRemove={toggleFavorite} />} />
+                  <Route path="/library" element={<UserLibrary userPlaylists={userPlaylists} setUserPlaylists={setUserPlaylists} saveUserPlaylists={async (playlists) => {
+                    try {
+                      const userDocRef = doc(db, 'users', user.uid);
+                      await updateDoc(userDocRef, { playlists });
+                    } catch (error) {
+                      console.error('Error saving playlists:', error);
+                    }
+                  }} favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                  <Route path="/playlist/:id" element={<PlaylistDetail playlist={playlist} onToggleFavorite={toggleFavorite} favorites={favorites} onRemove={removeFromPlaylist} />} />
+                  <Route path="/album/:id" element={<AlbumDetail onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                  <Route path="/artist/:id" element={<ArtistDetail onToggleFavorite={toggleFavorite} favorites={favorites} />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </div>
+              </ErrorBoundary>
+            </main>
           </div>
 
-          {/* Area: Main Content */}
-          <main className="area-main overflow-y-auto custom-scrollbar relative flex flex-col">
-            <Header />
-            <div className="flex-1 p-6">
+          {/* Mobile Layout */}
+          <div className="md:hidden flex-1 overflow-y-auto custom-scrollbar bg-slate-950" style={{ paddingBottom: '140px' }}>
+            <ErrorBoundary fallback={<div className="p-8 text-center">Error al cargar contenido</div>}>
               <Routes>
-                <Route path="/" element={
-                  <HomeView
-                    favorites={favorites}
-                    onToggleFavorite={toggleFavorite}
-                    onAddPlaylist={openAddToPlaylistModal}
-                  />
-                } />
-                <Route path="/search" element={<SearchResults favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={openAddToPlaylistModal} />} />
-                <Route path="/artist/:id" element={<ArtistDetail favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={openAddToPlaylistModal} />} />
-                <Route path="/album/:id" element={<AlbumDetail favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={openAddToPlaylistModal} />} />
-                <Route path="/playlist/:id" element={<PlaylistDetail favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={openAddToPlaylistModal} />} />
-                <Route path="/library" element={
-                  <UserLibrary
-                    userPlaylists={userPlaylists}
-                    setUserPlaylists={setUserPlaylists}
-                    saveUserPlaylists={saveUserPlaylists}
-                    favorites={favorites}
-                    toggleFavorite={toggleFavorite}
-                    onAddPlaylist={openAddToPlaylistModal}
-                  />
-                } />
-                <Route path="/favorites" element={<Favorites favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={openAddToPlaylistModal} />} />
+                <Route path="/" element={<HomeView onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/search/results" element={<SearchResults onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                <Route path="/radio" element={<Radio onToggleFavorite={toggleFavorite} favorites={favorites} />} />
+                <Route path="/favorites" element={<Favorites favorites={favorites} onToggleFavorite={toggleFavorite} onRemove={toggleFavorite} />} />
+                <Route path="/library" element={<UserLibrary userPlaylists={userPlaylists} setUserPlaylists={setUserPlaylists} saveUserPlaylists={async (playlists) => {
+                    try {
+                      const userDocRef = doc(db, 'users', user.uid);
+                      await updateDoc(userDocRef, { playlists });
+                    } catch (error) {
+                      console.error('Error saving playlists:', error);
+                    }
+                  }} favorites={favorites} toggleFavorite={toggleFavorite} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                <Route path="/playlist/:id" element={<PlaylistDetail playlist={playlist} onToggleFavorite={toggleFavorite} favorites={favorites} onRemove={removeFromPlaylist} />} />
+                <Route path="/album/:id" element={<AlbumDetail onToggleFavorite={toggleFavorite} favorites={favorites} onAddPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }} />} />
+                <Route path="/artist/:id" element={<ArtistDetail onToggleFavorite={toggleFavorite} favorites={favorites} />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+            </ErrorBoundary>
+          </div>
+
+          {/* Player Bar (Desktop) */}
+          <ErrorBoundary fallback={<div className="h-20 bg-slate-900/80 border-t border-white/10">Reproductor no disponible</div>}>
+            <div className="hidden md:block fixed bottom-0 left-64 right-0 h-24 z-50">
+              <PlayerBar
+                onShowNowPlaying={() => setShowNowPlaying(true)}
+                onShowLyrics={() => setShowMobilePlayer(true)}
+                onShowQueue={() => setShowMobilePlayer(true)}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+                onAddToPlaylist={(item) => { setItemToAdd(item); setShowAddPlaylist(true); }}
+              />
             </div>
-          </main>
+          </ErrorBoundary>
 
-          {/* Area: Right Panel (Now Playing) */}
-          <div className="area-right-panel hidden md:block">
-            <RightPanel
-              favorites={favorites}
-              toggleFavorite={toggleFavorite}
-              togglePlaylist={openAddToPlaylistModal}
-              playlist={userPlaylists}
-            />
-          </div>
-
-          {/* Area: Player */}
-          <div className="area-player">
-            <PlayerBar
-              onShowNowPlaying={() => setNowPlayingModalOpen(true)}
-              favorites={favorites}
-              toggleFavorite={toggleFavorite}
-              onAddToPlaylist={openAddToPlaylistModal}
-              onGoToAlbum={() => { }}
-            />
-          </div>
+          {/* Bottom Navigation (Mobile) */}
+          <ErrorBoundary>
+            <BottomNav onLogout={handleLogout} onShowPlayer={() => setShowMobilePlayer(true)} />
+          </ErrorBoundary>
 
           {/* Modals */}
-          {nowPlayingModalOpen && (
-            <>
-              {/* Desktop Modal */}
-              <div className="hidden md:block">
-                <NowPlayingModal
-                  onClose={() => setNowPlayingModalOpen(false)}
-                  favorites={favorites}
-                  toggleFavorite={toggleFavorite}
-                  togglePlaylist={openAddToPlaylistModal}
-                  playlist={userPlaylists}
-                />
-              </div>
-              {/* Mobile Full Screen Player */}
-              <div className="md:hidden">
-                <MobileFullScreenPlayer
-                  onClose={() => setNowPlayingModalOpen(false)}
-                  favorites={favorites}
-                  toggleFavorite={toggleFavorite}
-                  togglePlaylist={openAddToPlaylistModal}
-                  playlist={userPlaylists}
-                />
-              </div>
-            </>
-          )}
-          {playlistModalOpen && (
-            <AddToPlaylistModal
-              isOpen={playlistModalOpen}
-              onClose={() => setPlaylistModalOpen(false)}
-              playlists={userPlaylists}
-              onAddToPlaylist={handleAddToPlaylist}
+          {showNowPlaying && (
+            <NowPlayingModal
+              onClose={() => setShowNowPlaying(false)}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+              togglePlaylist={addToPlaylist}
+              playlist={playlist}
             />
           )}
 
-          {/* Mobile Bottom Nav */}
-          <BottomNav onLogout={handleLogout} />
+          <AddToPlaylistModal
+            isOpen={showAddPlaylist && itemToAdd !== null}
+            onClose={() => { setShowAddPlaylist(false); setItemToAdd(null); }}
+            playlists={userPlaylists}
+            onAddToPlaylist={(playlistId) => {
+              if (itemToAdd) {
+                addToPlaylist(itemToAdd);
+                setShowAddPlaylist(false);
+                setItemToAdd(null);
+              }
+            }}
+          />
+
+          {showMobilePlayer && (
+            <MobileFullScreenPlayer
+              onClose={() => setShowMobilePlayer(false)}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+              togglePlaylist={addToPlaylist}
+              playlist={playlist}
+            />
+          )}
         </div>
-      </Router>
-    </PlayerProvider>
+      </PlayerProvider>
+    </Router>
   );
 }
-
-

@@ -10,7 +10,7 @@ export default function Favorites({ favorites, toggleFavorite, onAddPlaylist }) 
   const { playItem } = usePlayer();
 
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-8 pb-24">
+    <div className="p-4 md:p-8 pb-24">
       <div className="mb-4 md:mb-8 glass-fluid-glow rounded-3xl overflow-hidden shadow-2xl">
         <div className="relative h-32 md:h-64 bg-gradient-to-br from-pink-600 to-purple-700">
           <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">

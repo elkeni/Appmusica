@@ -81,27 +81,16 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
     }
 
     return (
-        <div className="h-full overflow-y-auto custom-scrollbar pb-32">
-            {/* Apple Music Style Header */}
-            <div className="bg-black sticky top-0 z-30">
-                <div className="px-6 py-6 flex items-end justify-between">
+        <div className="pb-8">
+            {/* Page Header */}
+            <div className="px-4 md:px-6 py-6">
+                <div className="flex items-end justify-between">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                        <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
                             Inicio
                         </h1>
+                        <p className="text-slate-400 text-sm mt-1">Descubre tu música favorita</p>
                     </div>
-                    {user && (
-                        <div className="flex items-center gap-4">
-                            {user.photoURL && (
-                                <img
-                                    src={user.photoURL}
-                                    alt={user.displayName || 'User'}
-                                    className="w-12 h-12 rounded-full border-2 border-purple-500/50 cursor-pointer hover:border-purple-500 transition-colors"
-                                    onClick={() => navigate('/library')}
-                                />
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
 
