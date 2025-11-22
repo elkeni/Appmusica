@@ -35,18 +35,21 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
             setLoading(true);
             setError(null);
             try {
-                // In a real implementation, this would use the auth object
-                // For now, we'll fetch fallback data if YouTube recommendations fail
-                const fallbackData = await getDeezerCharts(50);
+                // Fetch top charts from Deezer as our primary recommendation source
+                const chartsData = await getDeezerCharts(50);
                 
+                if (!chartsData || chartsData.length === 0) {
+                    throw new Error('No recommendations available');
+                }
+
                 setRecommendations({
-                    highlighted: fallbackData.slice(0, 15),
-                    new: fallbackData.slice(15, 30),
-                    recent: fallbackData.slice(30, 45)
+                    highlighted: chartsData.slice(0, 15),   // Top Charts tracks
+                    new: chartsData.slice(15, 30),          // New releases
+                    recent: chartsData.slice(30, 45)        // Recent popular
                 });
             } catch (err) {
                 console.error('Error loading recommendations:', err);
-                setError('Error al cargar recomendaciones');
+                setError('Error al cargar recomendaciones. Intenta de nuevo más tarde.');
             } finally {
                 setLoading(false);
             }
@@ -109,11 +112,11 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
                 </div>
             )}
 
-            {/* Section 1: Sugerencias Destacadas para Ti */}
+            {/* Section 1: Top Charts */}
             <section className="py-8">
                 <div className="px-6 mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                        Sugerencias destacadas para ti
+                        Top Charts
                     </h2>
                     {recommendations.highlighted.length > 0 && (
                         <button
@@ -177,11 +180,11 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
                 </div>
             </section>
 
-            {/* Section 2: Novedad */}
+            {/* Section 2: New Releases */}
             <section className="py-8">
                 <div className="px-6 mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-white">
-                        Novedad
+                        Nuevos lanzamientos
                     </h2>
                     {recommendations.new.length > 0 && (
                         <button
@@ -245,12 +248,12 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
                 </div>
             </section>
 
-            {/* Section 3: Escuchado Recientemente */}
+            {/* Section 3: Popular Now */}
             {recommendations.recent.length > 0 && (
                 <section className="py-8">
                     <div className="px-6 mb-6 flex items-center justify-between">
                         <h2 className="text-2xl font-bold text-white">
-                            Escuchado recientemente
+                            Populares ahora
                         </h2>
                         <button
                             onClick={() => scroll('recent', 'right')}
@@ -316,13 +319,13 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
                         Sin recomendaciones aún
                     </h3>
                     <p className="text-slate-400 mb-6">
-                        Conecta tu cuenta de YouTube para obtener recomendaciones personalizadas basadas en tu historial.
+                        Estamos cargando las mejores recomendaciones del momento. Intenta de nuevo en unos segundos.
                     </p>
                     <button
-                        onClick={() => navigate('/library')}
+                        onClick={() => window.location.reload()}
                         className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-semibold transition-colors"
                     >
-                        Ver Biblioteca
+                        Reintentar
                     </button>
                 </div>
             )}

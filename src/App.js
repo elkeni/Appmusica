@@ -44,12 +44,18 @@ export default function App() {
       setUser(currentUser);
       
       if (currentUser) {
+        // Generate avatar if not present
+        let photoURL = currentUser.photoURL;
+        if (!photoURL && currentUser.displayName) {
+          photoURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName)}&background=6366f1&color=fff&bold=true`;
+        }
+
         // Store user data in localStorage for access in child components
         localStorage.setItem('appmusica_user', JSON.stringify({
           uid: currentUser.uid,
           email: currentUser.email,
           displayName: currentUser.displayName,
-          photoURL: currentUser.photoURL
+          photoURL: photoURL
         }));
 
         // Load user data from Firestore
@@ -66,7 +72,7 @@ export default function App() {
             await setDoc(userDocRef, {
               email: currentUser.email,
               displayName: currentUser.displayName,
-              photoURL: currentUser.photoURL,
+              photoURL: photoURL,
               favorites: [],
               playlists: [],
               createdAt: new Date().toISOString()

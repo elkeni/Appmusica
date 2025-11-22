@@ -1,9 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore"; // <--- Importante: Importar Firestore
-
+import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// Pega aquí tu configuración real de Firebase
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "appmusica-5c872.firebaseapp.com",
@@ -14,13 +13,9 @@ const firebaseConfig = {
   measurementId: "G-KT5M6DYJ39"
 };
 
-// Inicializar la App
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // Inicializa Firebase Authentication
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-
-// ⚠️ ESTA ES LA LÍNEA QUE TE FALTABA:
-const db = getFirestore(app); 
-
-// Ahora sí podemos exportar db y auth porque ya existen
 export { db, auth };
