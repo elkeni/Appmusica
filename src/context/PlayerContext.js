@@ -636,11 +636,41 @@ export const PlayerProvider = ({ children }) => {
                         }}
                         onPlay={() => {
                             console.log('▶️ ReactPlayer onPlay event');
-                            // Clear pending operations when YouTube confirms play
+                            
+                            // CRITICAL: Unmute immediately when play starts
+                            if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
+                                try {
+                                    const internalPlayer = playerRef.current.getInternalPlayer();
+                                    if (internalPlayer) {
+                                        // Force unmute
+                                        if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
+                                            internalPlayer.unMute();
+                                            console.log('🔊 FORCE UNMUTED on play event');
+                                        }
+                                        
+                                        // Force volume
+                                        if (typeof internalPlayer.setVolume === 'function') {
+                                            internalPlayer.setVolume(100); // MAX VOLUME for testing
+                                            console.log('🔊 FORCE VOLUME 100%');
+                                        }
+                                        
+                                        // Check player state
+                                        if (typeof internalPlayer.getPlayerState === 'function') {
+                                            const state = internalPlayer.getPlayerState();
+                                            console.log('📊 YouTube Player State:', state);
+                                            // 1 = PLAYING, 2 = PAUSED, 3 = BUFFERING
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('❌ Error in onPlay:', error);
+                                }
+                            }
+                            
+                            // Clear pending operations
                             if (playPromiseRef.current) {
                                 playPromiseRef.current = null;
                             }
-                            playAttempts.current = 0; // Reset error counter
+                            playAttempts.current = 0;
                         }}
                         onPause={() => {
                             console.log('⏸️ ReactPlayer onPause event');
