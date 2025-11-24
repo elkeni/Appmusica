@@ -132,6 +132,8 @@ export const PlayerProvider = ({ children }) => {
 
     // Safe pause function with enhanced coordination
     const safePause = useCallback(async () => {
+        console.log('⏸️ safePause() called');
+        console.trace('Call stack:');
         isPausing.current = true;
 
         // Cancel any pending play promise
@@ -237,7 +239,14 @@ export const PlayerProvider = ({ children }) => {
                 isPlayerReady.current = false;
                 
                 setError(null);
-                await safePause(); // Ensure previous track is stopped
+                
+                // Only pause if something is actually playing
+                if (isPlaying) {
+                    console.log('⏸️ Pausing previous track');
+                    await safePause(); // Ensure previous track is stopped
+                } else {
+                    console.log('▶️ No need to pause - nothing playing');
+                }
 
                 // Si no tiene playbackUrl, obtenerlo vía MusicRepository
                 if (!currentTrack.playbackUrl) {
@@ -381,11 +390,15 @@ export const PlayerProvider = ({ children }) => {
             
             // CRITICAL: Wait for loadTrack to complete before playing
             // The loadTrack effect will clear isSwitchingTrack flag
-            await new Promise(resolve => setTimeout(resolve, 400));
+            await new Promise(resolve => setTimeout(resolve, 500));
             
             // Only play if track loading succeeded
+            console.log('🎯 Checking if ready to play... isSwitchingTrack:', isSwitchingTrack.current);
             if (!isSwitchingTrack.current) {
+                console.log('✅ Starting playback from playItem');
                 await safePlay();
+            } else {
+                console.warn('⚠️ Track still switching, skipping autoplay');
             }
 
             // Queue Logic
@@ -592,9 +605,23 @@ export const PlayerProvider = ({ children }) => {
 
     // PHASE 5: Safe togglePlayPause with full coordination
     const togglePlayPause = async () => {
-        if (!currentTrack || !currentTrack.playbackUrl) {
-            console.warn('⚠️ No track or playbackUrl available');
+        if (!currentTrack) {
+            console.warn('⚠️ No track available');
             return;
+        }
+
+        // If no playbackUrl yet, wait for it (up to 3 seconds)
+        if (!currentTrack.playbackUrl) {
+            console.log('⏳ Waiting for playbackUrl...');
+            const startTime = Date.now();
+            while (!currentTrack.playbackUrl && Date.now() - startTime < 3000) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            if (!currentTrack.playbackUrl) {
+                console.warn('⚠️ PlaybackUrl not available after 3s');
+                return;
+            }
         }
 
         // Don't allow toggle during track switch
