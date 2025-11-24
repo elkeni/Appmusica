@@ -605,28 +605,20 @@ export const PlayerProvider = ({ children }) => {
 
     // PHASE 5: Safe togglePlayPause with full coordination
     const togglePlayPause = async () => {
+        // CRITICAL: Ignore if track is switching or loading
+        if (isSwitchingTrack.current || loading) {
+            console.log('⏭️ Track loading or switching, ignoring toggle');
+            return;
+        }
+
         if (!currentTrack) {
             console.warn('⚠️ No track available');
             return;
         }
 
-        // If no playbackUrl yet, wait for it (up to 3 seconds)
+        // If no playbackUrl yet, canción está cargando
         if (!currentTrack.playbackUrl) {
-            console.log('⏳ Waiting for playbackUrl...');
-            const startTime = Date.now();
-            while (!currentTrack.playbackUrl && Date.now() - startTime < 3000) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-            }
-            
-            if (!currentTrack.playbackUrl) {
-                console.warn('⚠️ PlaybackUrl not available after 3s');
-                return;
-            }
-        }
-
-        // Don't allow toggle during track switch
-        if (isSwitchingTrack.current) {
-            console.log('⏭️ Track switch in progress, ignoring toggle');
+            console.log('⏳ Track still loading, ignoring toggle');
             return;
         }
 
