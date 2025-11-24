@@ -83,7 +83,7 @@ const trackQuotaUsage = (cost) => {
         localStorage.setItem('youtube_quota_usage', JSON.stringify({
             date: today,
             used: quotaUsedToday
-        });
+        }));
     } catch (error) {
         // Silently track quota
     }
