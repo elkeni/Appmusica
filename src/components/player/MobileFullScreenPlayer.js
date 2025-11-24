@@ -88,6 +88,7 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
 
         fetchLyrics();
         return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTrack?.id, currentTrack?.title, currentTrack?.artist, duration]);
 
     const handleDragStart = (e) => {

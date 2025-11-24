@@ -157,4 +157,5 @@ class DeezerProvider {
     }
 }
 
-export default new DeezerProvider();
+const deezerProvider = new DeezerProvider();
+export default deezerProvider;

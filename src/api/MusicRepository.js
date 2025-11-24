@@ -307,4 +307,5 @@ class MusicRepository {
 }
 
 // Exportar instancia singleton
-export default new MusicRepository();
+const musicRepository = new MusicRepository();
+export default musicRepository;

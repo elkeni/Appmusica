@@ -511,4 +511,5 @@ class YouTubeProvider {
     }
 }
 
-export default new YouTubeProvider();
+const youTubeProvider = new YouTubeProvider();
+export default youTubeProvider;

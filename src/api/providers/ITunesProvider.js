@@ -171,4 +171,5 @@ class ITunesProvider {
     }
 }
 
-export default new ITunesProvider();
+const iTunesProvider = new ITunesProvider();
+export default iTunesProvider;

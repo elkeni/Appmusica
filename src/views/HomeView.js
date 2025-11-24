@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Play, ChevronRight } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useMusic } from '../hooks/useMusic';
 import { formatDateShortSpanish } from '../utils/formatUtils';
 
 export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist }) {
-    const navigate = useNavigate();
     const { playItem } = usePlayer();
     const { getTrending } = useMusic();
-    const [user, setUser] = useState(null);
     const [recommendations, setRecommendations] = useState({
         highlighted: [],
         new: [],
@@ -20,15 +17,6 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
 
     // Refs for horizontal scroll containers
     const scrollContainerRef = useRef({});
-
-    // Get user from context (we'll implement this)
-    useEffect(() => {
-        // For now, get user from localStorage or auth state
-        const userStr = localStorage.getItem('appmusica_user');
-        if (userStr) {
-            setUser(JSON.parse(userStr));
-        }
-    }, []);
 
     // Load personalized recommendations on mount
     useEffect(() => {
@@ -61,6 +49,7 @@ export default function HomeView({ onToggleFavorite, favorites, onAddPlaylist })
         };
 
         loadRecommendations();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Scroll handlers for carousel

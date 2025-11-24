@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Radio as RadioIcon, Play, Music2, Disc3, Wifi } from 'lucide-react';
+import { Radio as RadioIcon, Play, Music2, Wifi } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useMusic } from '../hooks/useMusic';
 
