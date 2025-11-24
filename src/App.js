@@ -6,25 +6,26 @@ import { auth, db } from './firebase';
 import { PlayerProvider } from './context/PlayerContext';
 
 // Components
-import Sidebar from './components/Sidebar';
-import PlayerBar from './components/PlayerBar';
-import BottomNav from './components/BottomNav';
-import Auth from './components/Auth';
-import Header from './components/Header';
-import NowPlayingModal from './components/NowPlayingModal';
-import AddToPlaylistModal from './components/AddToPlaylistModal';
-import MobileFullScreenPlayer from './components/MobileFullScreenPlayer';
+import Sidebar from './components/layout/Sidebar';
+import PlayerBar from './components/player/PlayerBar';
+import BottomNav from './components/layout/BottomNav';
+import Auth from './components/shared/Auth';
+import Header from './components/layout/Header';
+import NowPlayingModal from './components/player/NowPlayingModal';
+import AddToPlaylistModal from './components/shared/AddToPlaylistModal';
+import MobileFullScreenPlayer from './components/player/MobileFullScreenPlayer';
+import QuotaMonitor from './components/shared/QuotaMonitor';
 
-// Pages
-import HomeView from './pages/HomeView';
-import Search from './pages/Search';
-import SearchResults from './pages/SearchResults';
-import Radio from './pages/Radio';
-import Favorites from './pages/Favorites';
-import UserLibrary from './pages/UserLibrary';
-import PlaylistDetail from './pages/PlaylistDetail';
-import AlbumDetail from './pages/AlbumDetail';
-import ArtistDetail from './pages/ArtistDetail';
+// Views
+import HomeView from './views/HomeView';
+import Search from './views/Search';
+import SearchResults from './views/SearchResults';
+import Radio from './views/Radio';
+import Favorites from './views/Favorites';
+import UserLibrary from './views/UserLibrary';
+import PlaylistDetail from './views/PlaylistDetail';
+import AlbumDetail from './views/AlbumDetail';
+import ArtistDetail from './views/ArtistDetail';
 
 // Styles
 import './index.css';
@@ -322,6 +323,9 @@ export default function App() {
               playlist={playlist}
             />
           )}
+
+          {/* PHASE 1: YouTube API Quota Monitor */}
+          <QuotaMonitor />
         </div>
       </PlayerProvider>
     </Router>

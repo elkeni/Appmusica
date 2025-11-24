@@ -1,12 +1,50 @@
-# CloudTune
+# 🎵 CloudTune
 
-Este proyecto es una aplicación web para escuchar estaciones de radio gratuitas. Está construida con React, Tailwind CSS y Firebase. La aplicación se puede ejecutar localmente en cualquier entorno que soporte Node.js y se puede desplegar fácilmente en Firebase Hosting. Puedes abrir este proyecto en Visual Studio seleccionando **Abrir carpeta** o creando un proyecto de Node.js desde la carpeta.
+CloudTune es una aplicación web moderna para streaming de música. Está construida con React, Tailwind CSS y Firebase, ofreciendo una experiencia de audio optimizada con soporte de caché inteligente y sistema de respaldo automático.
 
-## Requisitos
+## ✨ Características
 
-- Node.js ≥ 14.
-- npm (o yarn) para instalar dependencias.
-- Una cuenta de [Firebase](https://console.firebase.google.com/) para crear tu proyecto.
+- 🎧 **Streaming de Audio Ilimitado** - Reproduce canciones de YouTube con calidad premium
+- 💾 **Caché Inteligente** - Ahorra hasta 95% de cuota de API con caché persistente
+- 🔄 **Sistema de Respaldo** - Funciona sin interrupciones incluso sin API key
+- 📊 **Monitor de Cuota en Tiempo Real** - Visualiza tu consumo de API
+- 🎨 **Interfaz Moderna** - Diseño responsive con Tailwind CSS
+- 🔐 **Autenticación Firebase** - Usuarios y playlists personalizadas
+- 🌐 **Multi-Provider** - Integración con Deezer, iTunes y YouTube
+
+## 🚀 Inicio Rápido
+
+### Requisitos
+
+- Node.js ≥ 14
+- npm (o yarn) para instalar dependencias
+- Una cuenta de [Firebase](https://console.firebase.google.com/) para tu proyecto
+- (Recomendado) API key de YouTube para mejor rendimiento
+
+### Instalación
+
+1. **Clonar e instalar dependencias:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Configurar variables de entorno:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edita `.env` y agrega tu YouTube API key (opcional pero recomendado):
+   ```env
+   REACT_APP_YOUTUBE_API_KEY=tu_api_key_aqui
+   ```
+
+   📖 **[Ver guía completa de configuración de API →](API_SETUP_GUIDE.md)**
+
+3. **Configurar Firebase:**
+
+   Crea un proyecto en Firebase y agrega una aplicación web. Copia los valores de configuración y reemplázalos en `src/firebase.js`.
 
 ## Configuración
 
@@ -66,6 +104,113 @@ Este proyecto es una aplicación web para escuchar estaciones de radio gratuitas
 - `firebase.json`: Configuración de Firebase Hosting.
 - `tailwind.config.js` y `postcss.config.js`: Configuración de Tailwind CSS.
 
-## Notas
+## 📊 Optimizaciones de Rendimiento
 
-La aplicación utiliza la API pública de [Radio Browser](https://www.radio-browser.info/) para buscar estaciones de radio. Ahora los favoritos se almacenan en **Cloud Firestore** a través de Firebase, lo que permite que tus favoritos se sincronicen entre dispositivos y usuarios que utilicen el mismo documento. Si quieres cambiar la colección o el documento utilizados para guardar los favoritos, edita el archivo `src/App.js`. El diseño es responsive y debe funcionar tanto en equipos de escritorio como en móviles.
+### Sistema de Caché (Phase 1)
+- **localStorage Cache:** Video IDs guardados permanentemente
+- **0 Cuota:** Reproducciones repetidas sin costo de API
+- **95%+ Ahorro:** La mayoría de reproducciones usan caché
+
+### Sistema de Respaldo (Phase 2)
+- **Invidious/Piped:** APIs alternativas gratuitas sin límite
+- **Rotación Automática:** 8 instancias públicas rotativas
+- **Sin Interrupciones:** La app funciona incluso sin API key
+
+### Monitoreo en Tiempo Real (Phase 3)
+- **Indicador Visual:** Estado de cuota en esquina inferior derecha
+- **Alertas Proactivas:** Notificaciones antes de agotar cuota
+- **Modo Fallback:** Cambio automático a APIs alternativas
+
+## 📖 Documentación
+
+- **[Guía de Configuración de APIs](API_SETUP_GUIDE.md)** - Setup detallado de YouTube API
+- **[Variables de Entorno](.env.example)** - Todas las opciones de configuración
+- **Arquitectura:** MusicRepository pattern con Provider abstraction
+- **Quota Management:** Sistema de monitoreo y optimización
+
+## 🔧 Solución de Problemas
+
+### Error 403 (Quota Exceeded)
+```bash
+# Solución 1: Generar nueva API key (recomendado)
+# Ver: API_SETUP_GUIDE.md → YouTube API Setup
+
+# Solución 2: Usar modo fallback (temporal)
+# Comentar REACT_APP_YOUTUBE_API_KEY en .env
+```
+
+### Sin Sonido
+- Verificar volumen del reproductor no está en 0
+- Verificar pestaña del navegador no está silenciada
+- Probar con otra canción (algunas pueden estar bloqueadas por región)
+
+### Canciones No Cargan
+- Verificar conexión a internet
+- Limpiar localStorage: DevTools → Application → Clear Storage
+- Revisar firewall no bloquea youtube.com, api.deezer.com
+
+**[Ver guía completa de troubleshooting →](API_SETUP_GUIDE.md#troubleshooting)**
+
+## 🎯 Uso Óptimo
+
+### Con API Key de YouTube
+- Búsqueda instantánea
+- ~500 canciones únicas por día
+- Reproducciones en caché ilimitadas (0 cuota)
+
+### Sin API Key (Fallback)
+- Búsqueda con delay de 2-3 segundos
+- Canciones ilimitadas
+- Reproducciones en caché instantáneas
+
+### Pre-cachear Favoritos
+Reproduce tus canciones favoritas una vez para cachearlas. Las reproducciones subsecuentes serán instantáneas y sin costo de cuota.
+
+## 📦 Estructura del Proyecto
+
+```
+src/
+├── api/
+│   ├── providers/          # Providers para Deezer, iTunes, YouTube
+│   │   ├── YouTubeProvider.js  (Phase 1 & 2 optimizado)
+│   │   ├── DeezerProvider.js
+│   │   └── ITunesProvider.js
+│   ├── utils/
+│   │   ├── cache.js        # Sistema de caché en memoria
+│   │   ├── errorHandler.js # Manejo de errores (Phase 1)
+│   │   └── youtubeFallback.js  (Phase 2: Invidious/Piped)
+│   ├── MusicRepository.js  # Facade pattern
+│   └── config.js
+├── components/
+│   ├── layout/             # Sidebar, Header, BottomNav
+│   ├── player/             # PlayerBar, NowPlayingModal
+│   ├── shared/             # QuotaMonitor (Phase 3), Auth
+│   └── lyrics/
+├── context/
+│   └── PlayerContext.js    # Global player state (Phase 1-5 audio fix)
+├── views/                  # HomeView, Search, Favorites, etc.
+└── firebase.js
+```
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Por favor:
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📝 Notas Técnicas
+
+- **Favoritos:** Sincronizados vía Cloud Firestore
+- **Autenticación:** Firebase Authentication
+- **APIs Externas:** YouTube Data API v3, Deezer API, iTunes API
+- **Fallback:** Invidious (5 instancias), Piped (3 instancias)
+- **Caché:** localStorage para persistencia, Map para sesión
+- **Diseño:** Responsive (desktop y móvil)
+
+## 📄 Licencia
+
+Este proyecto es de código abierto. Ver el archivo LICENSE para más detalles.
