@@ -217,7 +217,7 @@ export const shouldUseFallback = (apiKey) => {
     return false;
 };
 
-const youtubeFallback = {
+export default {
     searchViaInvidious,
     searchViaPiped,
     findVideoIdWithFallback,
