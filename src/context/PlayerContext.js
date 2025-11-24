@@ -233,35 +233,10 @@ export const PlayerProvider = ({ children }) => {
         })();
 
         return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTrack?.image]);
 
-    // ReactPlayer handlers
-    const handlePlayerReady = useCallback(() => {
-        console.log('✅ ReactPlayer ready');
-        setLoading(false);
-    }, []);
-
-    const handlePlayerError = useCallback(async (error) => {
-        console.error('❌ ReactPlayer error:', error);
-        setError('Error al reproducir. Saltando...');
-        setLoading(false);
-        await safePause();
-        setTimeout(() => handleNextTrackRef.current?.(), 2000);
-    }, [safePause]);
-
-    const handlePlayerProgress = useCallback(({ playedSeconds, loadedSeconds }) => {
-        setCurrentTime(playedSeconds);
-        // Marcar como listo cuando tenga suficiente buffer
-        if (loadedSeconds > 1 && loading) {
-            setLoading(false);
-        }
-    }, [loading]);
-
-    const handlePlayerEnded = useCallback(async () => {
-        console.log('✅ Track ended, playing next');
-        await safePause();
-        handleNextTrackRef.current?.();
-    }, [safePause]);
+    // Note: ReactPlayer handlers are now defined inline in the JSX below
 
     // PHASE 2: Load new track when currentTrack changes - WITH DEBOUNCE
     useEffect(() => {
@@ -335,6 +310,7 @@ export const PlayerProvider = ({ children }) => {
             cancelled = true;
             isSwitchingTrack.current = false;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentTrack?.id, safePause]);
 
     // Poll for duration until we get it (with safety checks)
@@ -556,6 +532,7 @@ export const PlayerProvider = ({ children }) => {
                 setFetchingRecommendations(false);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [queue, currentTrack, history, playItem]);
     
     // Update ref after definition

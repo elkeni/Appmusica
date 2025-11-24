@@ -139,8 +139,6 @@ export const searchViaYouTubeDirectly = async (query) => {
     try {
         console.log(`🔄 [Fallback] Trying direct YouTube search...`);
         
-        const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-        
         // This would require a CORS proxy or backend service
         // For now, we'll skip this method as it requires server-side implementation
         console.warn('⚠️ [Fallback] Direct YouTube scraping requires CORS proxy (skipped)');
@@ -219,7 +217,7 @@ export const shouldUseFallback = (apiKey) => {
     return false;
 };
 
-export default {
+const youtubeFallback = {
     searchViaInvidious,
     searchViaPiped,
     findVideoIdWithFallback,

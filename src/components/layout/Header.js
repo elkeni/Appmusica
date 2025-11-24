@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearch = (e) => {

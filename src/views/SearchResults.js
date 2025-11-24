@@ -53,6 +53,7 @@ export default function SearchResults({ favorites, toggleFavorite, onAddPlaylist
         }, 500);
 
         return () => clearTimeout(debounce);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query]);
 
     const handleFilterChange = (filterId) => {
