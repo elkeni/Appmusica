@@ -36,135 +36,16 @@ export const PlayerProvider = ({ children }) => {
     const isSwitchingTrack = useRef(false);   // Track if we're changing tracks
     const playAttempts = useRef(0);           // Count failed play attempts
 
-    // PHASE 1: Safe play with ReactPlayer coordination
-    const safePlay = useCallback(async () => {
-        // CRITICAL: Don't attempt play if switching tracks
-        if (isSwitchingTrack.current) {
-            console.log('⏭️ Track switch in progress, skipping play');
-            return;
-        }
-
-        // Simplified: Just set playing to true and let ReactPlayer handle it
-        console.log('▶️ Starting playback...');
-
-        // Wait for any pending pause operation
-        if (isPausing.current) {
-            console.log('⏸️ Pause in progress, waiting...');
-            await new Promise(resolve => setTimeout(resolve, 150));
-        }
-
-        // Cancel any pending play promise
-        if (playPromiseRef.current) {
-            try {
-                await playPromiseRef.current;
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.warn('Previous play interrupted:', error.message);
-                }
-            }
-            playPromiseRef.current = null;
-        }
-
-        // Create new play promise with retry logic
-        playPromiseRef.current = new Promise(async (resolve, reject) => {
-            try {
-                // Verify player reference exists
-                if (!playerRef.current) {
-                    throw new Error('PlayerRef not available');
-                }
-
-                // Set playing state
-                setIsPlaying(true);
-                
-                // Wait for React to propagate the prop change
-                await new Promise(r => setTimeout(r, 100));
-
-                // Verify internal player is ready (YouTube IFrame API)
-                if (typeof playerRef.current.getInternalPlayer === 'function') {
-                    const internalPlayer = playerRef.current.getInternalPlayer();
-                    
-                    if (internalPlayer && typeof internalPlayer.playVideo === 'function') {
-                        // Unmute if needed
-                        if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
-                            internalPlayer.unMute();
-                        }
-                        
-                        // Call YouTube's playVideo
-                        internalPlayer.playVideo();
-                        console.log('✅ YouTube playVideo() called');
-                    }
-                }
-
-                playAttempts.current = 0; // Reset counter on success
-                resolve();
-            } catch (error) {
-                playAttempts.current++;
-                
-                if (error.name === 'AbortError') {
-                    console.log('⏸️ Play aborted intentionally (fast skip)');
-                } else if (error.name === 'NotAllowedError') {
-                    console.warn('🔇 Autoplay blocked by browser. User interaction required.');
-                    setIsPlaying(false);
-                } else {
-                    console.error('❌ Play error:', error.message);
-                    
-                    // Retry logic for transient errors
-                    if (playAttempts.current < 3) {
-                        console.log(`🔄 Retrying play (attempt ${playAttempts.current}/3)...`);
-                        setTimeout(() => safePlay(), 500);
-                    } else {
-                        setIsPlaying(false);
-                        setError('No se pudo reproducir el audio');
-                    }
-                }
-                reject(error);
-            } finally {
-                playPromiseRef.current = null;
-            }
-        });
-
-        try {
-            await playPromiseRef.current;
-        } catch (error) {
-            // Error already logged in promise
-        }
+    // SIMPLIFIED: Just set playing state - ReactPlayer handles everything
+    const safePlay = useCallback(() => {
+        console.log('▶️ safePlay() - Setting isPlaying to true');
+        setIsPlaying(true);
     }, []);
 
-    // Safe pause function with enhanced coordination
-    const safePause = useCallback(async () => {
-        console.log('⏸️ safePause() called');
-        console.trace('Call stack:');
-        isPausing.current = true;
-
-        // Cancel any pending play promise
-        if (playPromiseRef.current) {
-            try {
-                await playPromiseRef.current;
-            } catch (error) {
-                // Ignore errors from interrupted play
-            }
-            playPromiseRef.current = null;
-        }
-
+    // SIMPLIFIED: Just set playing state to false
+    const safePause = useCallback(() => {
+        console.log('⏸️ safePause() - Setting isPlaying to false');
         setIsPlaying(false);
-        
-        // Wait for state to settle and React to propagate
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Call YouTube's pauseVideo if available
-        if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
-            try {
-                const internalPlayer = playerRef.current.getInternalPlayer();
-                if (internalPlayer && typeof internalPlayer.pauseVideo === 'function') {
-                    internalPlayer.pauseVideo();
-                    console.log('✅ YouTube pauseVideo() called');
-                }
-            } catch (error) {
-                console.warn('Pause call failed:', error.message);
-            }
-        }
-        
-        isPausing.current = false;
     }, []);
 
     // Initialize waveform
@@ -234,19 +115,7 @@ export const PlayerProvider = ({ children }) => {
             }
 
             try {
-                // CRITICAL: Set switching flag to prevent play collisions
-                isSwitchingTrack.current = true;
-                isPlayerReady.current = false;
-                
                 setError(null);
-                
-                // Only pause if something is actually playing
-                if (isPlaying) {
-                    console.log('⏸️ Pausing previous track');
-                    await safePause(); // Ensure previous track is stopped
-                } else {
-                    console.log('▶️ No need to pause - nothing playing');
-                }
 
                 // Si no tiene playbackUrl, obtenerlo vía MusicRepository
                 if (!currentTrack.playbackUrl) {
@@ -276,12 +145,10 @@ export const PlayerProvider = ({ children }) => {
                 // Initialize waveform
                 initWaveformFor(currentTrack.id || currentTrack.videoId || currentTrack.title || '');
                 
-                // CRITICAL: Wait for ReactPlayer to mount and be ready
-                // This prevents play() being called before the iframe loads
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                // Clear switching flag
-                isSwitchingTrack.current = false;
+                // Clear switching flag after a brief delay
+                setTimeout(() => {
+                    isSwitchingTrack.current = false;
+                }, 500);
                 
             } catch (err) {
                 if (cancelled) return;
@@ -289,7 +156,7 @@ export const PlayerProvider = ({ children }) => {
                 setError('No se pudo cargar la canción');
                 setLoading(false);
                 isSwitchingTrack.current = false;
-                await safePause();
+                safePause();
                 setTimeout(() => handleNextTrackRef.current?.(), 2000);
             }
         };
@@ -354,13 +221,13 @@ export const PlayerProvider = ({ children }) => {
     // PHASE 3: Play item function with enhanced coordination
     const playItem = useCallback(async (item, context = null) => {
         try {
+            console.log('🎵 playItem() called for:', item.title);
             setError(null);
             setLoading(true);
             
-            // CRITICAL: Stop current playback before switching
+            // Stop current playback before switching
+            safePause();
             isSwitchingTrack.current = true;
-            isPlayerReady.current = false;
-            await safePause();
 
             // Universal track data normalization
             const trackData = {
@@ -392,14 +259,9 @@ export const PlayerProvider = ({ children }) => {
             // The loadTrack effect will clear isSwitchingTrack flag
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Only play if track loading succeeded
-            console.log('🎯 Checking if ready to play... isSwitchingTrack:', isSwitchingTrack.current);
-            if (!isSwitchingTrack.current) {
-                console.log('✅ Starting playback from playItem');
-                await safePlay();
-            } else {
-                console.warn('⚠️ Track still switching, skipping autoplay');
-            }
+            // Auto-play the track after loading
+            console.log('✅ Track loaded, starting autoplay');
+            safePlay();
 
             // Queue Logic
             const isContextArray = Array.isArray(context);
@@ -463,7 +325,7 @@ export const PlayerProvider = ({ children }) => {
                 const sourceTrack = currentTrack?.originalData || currentTrack;
                 if (!sourceTrack) {
                     console.warn('No current track for recommendations');
-                    await safePause();
+                    safePause();
                     setRadioMode(false);
                     setFetchingRecommendations(false);
                     return;
@@ -515,13 +377,13 @@ export const PlayerProvider = ({ children }) => {
                     await playItem(next, 'KEEP');
                 } else {
                     console.error('❌ All recommendation strategies failed');
-                    await safePause();
+                    safePause();
                     setRadioMode(false);
                     setFetchingRecommendations(false);
                 }
             } catch (e) {
                 console.error('❌ Infinite Radio error:', e);
-                await safePause();
+                safePause();
                 setRadioMode(false);
                 setFetchingRecommendations(false);
             }
@@ -658,7 +520,7 @@ export const PlayerProvider = ({ children }) => {
         // Toggle based on current state
         if (isPlaying) {
             console.log('⏸️ Toggling to PAUSE');
-            await safePause();
+            safePause();
         } else {
             console.log('▶️ Toggling to PLAY');
             await safePlay();
@@ -809,7 +671,7 @@ export const PlayerProvider = ({ children }) => {
                             playPromiseRef.current = null;
                             isPausing.current = false;
                             isPlayerReady.current = false;
-                            await safePause();
+                            safePause();
                             handleNextTrackRef.current?.();
                         }}
                         onError={async (error) => {
@@ -823,7 +685,7 @@ export const PlayerProvider = ({ children }) => {
                             setError('Error al reproducir');
                             setLoading(false);
                             isPlayerReady.current = false;
-                            await safePause();
+                            safePause();
                             
                             // Skip to next track after error
                             setTimeout(() => handleNextTrackRef.current?.(), 2000);
