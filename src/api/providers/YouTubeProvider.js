@@ -20,7 +20,7 @@ const getPersistentCache = (trackId) => {
         if (cached) {
             const parsed = JSON.parse(cached);
             // Video IDs never expire (they don't change)
-            console.log(`💾 [YouTube] Cache hit for: ${trackId} (0 quota used)`);
+            console.log(`💾 [YouTube] Cache hit for: ${trackId}`);
             return parsed.videoId;
         }
     } catch (error) {
@@ -83,14 +83,9 @@ const trackQuotaUsage = (cost) => {
         localStorage.setItem('youtube_quota_usage', JSON.stringify({
             date: today,
             used: quotaUsedToday
-        }));
-        
-        const remaining = DAILY_QUOTA_LIMIT - quotaUsedToday;
-        if (remaining < 500) {
-            console.warn(`⚠️ [YouTube] Low quota: ${remaining} points remaining`);
-        }
+        });
     } catch (error) {
-        console.warn('⚠️ Error tracking quota:', error);
+        // Silently track quota
     }
 };
 
@@ -210,7 +205,6 @@ class YouTubeProvider {
 
         // PHASE 2: Use fallback if quota exceeded or no API key
         if (shouldUseFallback(this.config.apiKey)) {
-            console.log('🔄 [YouTube] Using fallback for search (quota exceeded or no API key)');
             
             try {
                 const fallbackResult = await findVideoIdWithFallback(query);
@@ -337,7 +331,6 @@ class YouTubeProvider {
 
         // PHASE 2: Check if we should use fallback methods
         if (shouldUseFallback(this.config.apiKey)) {
-            console.log('🔄 [YouTube] Using fallback methods (no API key or quota exceeded)');
             
             try {
                 const fallbackResult = await findVideoIdWithFallback(searchQuery);
@@ -368,7 +361,7 @@ class YouTubeProvider {
         }
 
         // PHASE 2: Try official API if available
-        console.log(`🔎 [YouTube] API call for: "${searchQuery}" (100 quota cost)`);
+        console.log(`🔎 [YouTube] API call for: "${searchQuery}"`);
         
         try {
             // PHASE 1: Optimized API call - minimal parameters

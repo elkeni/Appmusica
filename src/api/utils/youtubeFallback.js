@@ -210,7 +210,6 @@ export const shouldUseFallback = (apiKey) => {
     }
     
     if (isQuotaExceeded()) {
-        console.log('🔄 [Fallback] Quota exceeded, using fallback');
         return true;
     }
     

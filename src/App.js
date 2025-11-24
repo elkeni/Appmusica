@@ -14,7 +14,6 @@ import Header from './components/layout/Header';
 import NowPlayingModal from './components/player/NowPlayingModal';
 import AddToPlaylistModal from './components/shared/AddToPlaylistModal';
 import MobileFullScreenPlayer from './components/player/MobileFullScreenPlayer';
-import QuotaMonitor from './components/shared/QuotaMonitor';
 
 // Views
 import HomeView from './views/HomeView';
@@ -323,9 +322,6 @@ export default function App() {
               playlist={playlist}
             />
           )}
-
-          {/* PHASE 1: YouTube API Quota Monitor */}
-          <QuotaMonitor />
         </div>
       </PlayerProvider>
     </Router>
