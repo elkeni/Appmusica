@@ -44,27 +44,8 @@ export const PlayerProvider = ({ children }) => {
             return;
         }
 
-        // CRITICAL: Wait for ReactPlayer to be ready
-        if (!isPlayerReady.current) {
-            console.log('⏳ Waiting for ReactPlayer to be ready...');
-            // If playerRef exists, assume ready
-            if (playerRef.current) {
-                console.log('⚡ PlayerRef exists, assuming ready');
-                isPlayerReady.current = true;
-            } else {
-                console.log('⏳ Waiting up to 2s for player...');
-            }
-            // Wait up to 2 seconds for player to be ready
-            const startTime = Date.now();
-            while (!isPlayerReady.current && Date.now() - startTime < 2000) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            
-            if (!isPlayerReady.current) {
-                console.warn('⚠️ ReactPlayer not ready after 2s, aborting play');
-                return;
-            }
-        }
+        // Simplified: Just set playing to true and let ReactPlayer handle it
+        console.log('▶️ Starting playback...');
 
         // Wait for any pending pause operation
         if (isPausing.current) {
@@ -718,7 +699,7 @@ export const PlayerProvider = ({ children }) => {
                         key={currentTrack.playbackUrl}
                         ref={playerRef}
                         url={currentTrack.playbackUrl}
-                        playing={isPlaying && !isSwitchingTrack.current}
+                        playing={isPlaying}
                         volume={volume}
                         muted={false}
                         loop={false}
