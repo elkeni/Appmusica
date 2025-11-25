@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Heart, ChevronRight, TrendingUp, Sparkles, Clock } from 'lucide-react';
+import { Play, ChevronRight, TrendingUp, Sparkles, Clock } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import { useMusic } from '../hooks/useMusic';

@@ -1,6 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import MusicRepository from '../api/MusicRepository';
-import { validateConfig } from '../api/config';
 
 /**
  * Custom Hook: useMusic
@@ -9,7 +8,6 @@ import { validateConfig } from '../api/config';
 export function useMusic() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [configValid, setConfigValid] = useState(false);
 
     /**
      * Buscar canciones
@@ -202,7 +200,6 @@ export function useMusic() {
         // Estado
         loading,
         error,
-        configValid,
 
         // Métodos principales
         search,

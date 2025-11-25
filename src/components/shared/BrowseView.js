@@ -92,6 +92,7 @@ export default function BrowseView({ onToggleFavorite, favorites, onAddPlaylist 
 
         loadData();
         return () => { isMounted = false; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Gradient generator for genres

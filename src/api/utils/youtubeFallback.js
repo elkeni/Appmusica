@@ -130,14 +130,10 @@ export const searchViaPiped = async (query, maxResults = 1) => {
  * This extracts the first video ID from YouTube's search results HTML
  */
 export const searchViaYouTubeDirectly = async (query) => {
-    try {
-        // This would require a CORS proxy or backend service
-        // For now, we'll skip this method as it requires server-side implementation
-        return null;
-    } catch (error) {
-        console.warn(`⚠️ [Fallback] Direct search failed:`, error.message);
-        return null;
-    }
+    // This would require a CORS proxy or backend service
+    // For now, we'll skip this method as it requires server-side implementation
+    console.warn(`⚠️ [Fallback] Direct YouTube search not implemented for query: ${query}`);
+    return null;
 };
 
 /**
@@ -204,10 +200,12 @@ export const shouldUseFallback = (apiKey) => {
     return false;
 };
 
-export default {
+const youtubeFallback = {
     searchViaInvidious,
     searchViaPiped,
     findVideoIdWithFallback,
     shouldUseFallback,
     isQuotaExceeded,
 };
+
+export default youtubeFallback;
