@@ -20,7 +20,6 @@ const getPersistentCache = (trackId) => {
         if (cached) {
             const parsed = JSON.parse(cached);
             // Video IDs never expire (they don't change)
-            console.log(`💾 [YouTube] Cache hit for: ${trackId} (0 quota used)`);
             return parsed.videoId;
         }
     } catch (error) {
@@ -37,7 +36,6 @@ const setPersistentCache = (trackId, videoId) => {
             timestamp: Date.now(),
             trackId
         }));
-        console.log(`💾 [YouTube] Cached videoId for: ${trackId}`);
     } catch (error) {
         console.warn('⚠️ Error writing persistent cache:', error);
     }
@@ -46,14 +44,11 @@ const setPersistentCache = (trackId, videoId) => {
 const clearOldYouTubeCache = () => {
     try {
         const keys = Object.keys(localStorage);
-        const oldKeys = keys.filter(key => 
-            key.startsWith(YOUTUBE_CACHE_PREFIX) && 
+        const oldKeys = keys.filter(key =>
+            key.startsWith(YOUTUBE_CACHE_PREFIX) &&
             !key.includes(YOUTUBE_CACHE_VERSION)
         );
         oldKeys.forEach(key => localStorage.removeItem(key));
-        if (oldKeys.length > 0) {
-            console.log(`🧹 [YouTube] Cleared ${oldKeys.length} old cache entries`);
-        }
     } catch (error) {
         console.warn('⚠️ Error clearing old cache:', error);
     }
@@ -84,13 +79,8 @@ const trackQuotaUsage = (cost) => {
             date: today,
             used: quotaUsedToday
         }));
-        
-        const remaining = DAILY_QUOTA_LIMIT - quotaUsedToday;
-        if (remaining < 500) {
-            console.warn(`⚠️ [YouTube] Low quota: ${remaining} points remaining`);
-        }
     } catch (error) {
-        console.warn('⚠️ Error tracking quota:', error);
+        // Silently track quota
     }
 };
 
@@ -104,7 +94,7 @@ const getQuotaUsage = () => {
                 return parsed.used;
             }
         }
-    } catch (error) {}
+    } catch (error) { }
     return 0;
 };
 
@@ -158,7 +148,7 @@ class YouTubeProvider {
      */
     normalizeTrack(youtubeVideo) {
         const snippet = youtubeVideo.snippet;
-        
+
         // Extraer artista y título del título del video
         const title = snippet.title;
         let artist = 'Unknown Artist';
@@ -180,9 +170,9 @@ class YouTubeProvider {
             .replace(/\(Video\)/gi, '')
             .trim();
 
-        const imageUrl = snippet.thumbnails?.maxres?.url || 
-                        snippet.thumbnails?.high?.url || 
-                        snippet.thumbnails?.medium?.url || '';
+        const imageUrl = snippet.thumbnails?.maxres?.url ||
+            snippet.thumbnails?.high?.url ||
+            snippet.thumbnails?.medium?.url || '';
 
         return {
             id: youtubeVideo.id.videoId || youtubeVideo.id,
@@ -206,15 +196,13 @@ class YouTubeProvider {
      * PHASE 2: With fallback support
      */
     async search(query, limit = 25) {
-        console.log(`🔍 [YouTube] Searching: "${query}"`);
 
         // PHASE 2: Use fallback if quota exceeded or no API key
         if (shouldUseFallback(this.config.apiKey)) {
-            console.log('🔄 [YouTube] Using fallback for search (quota exceeded or no API key)');
-            
+
             try {
                 const fallbackResult = await findVideoIdWithFallback(query);
-                
+
                 if (fallbackResult?.videoId) {
                     // Return as single result array
                     return [{
@@ -233,7 +221,7 @@ class YouTubeProvider {
             } catch (fallbackError) {
                 console.warn('⚠️ [YouTube] Fallback search failed:', fallbackError.message);
             }
-            
+
             // If no API key, return empty
             if (!this.config.apiKey) {
                 console.warn('⚠️ [YouTube] No API key and fallback failed');
@@ -256,7 +244,6 @@ class YouTubeProvider {
             trackQuotaUsage(100);
 
             const tracks = data.items?.map(video => this.normalizeTrack(video)) || [];
-            console.log(`✅ [YouTube] Found ${tracks.length} videos`);
             return tracks;
         } catch (error) {
             // PHASE 2: Try fallback on 403
@@ -264,12 +251,12 @@ class YouTubeProvider {
                 console.error('🚨 [YouTube] QUOTA EXCEEDED - Trying fallback');
                 try {
                     localStorage.setItem('youtube_quota_exceeded', Date.now().toString());
-                } catch (e) {}
-                
+                } catch (e) { }
+
                 // Try fallback
                 try {
                     const fallbackResult = await findVideoIdWithFallback(query);
-                    
+
                     if (fallbackResult?.videoId) {
                         return [{
                             id: fallbackResult.videoId,
@@ -288,7 +275,7 @@ class YouTubeProvider {
                 } catch (fallbackError) {
                     console.warn('⚠️ [YouTube] Fallback also failed');
                 }
-                
+
                 return [];
             }
             throw error;
@@ -300,17 +287,15 @@ class YouTubeProvider {
      * PHASE 1: Optimized with persistent cache to minimize API calls
      */
     async getAudioStream(track) {
-        console.log(`🎵 [YouTube] Getting audio stream for: "${track.title}" by ${track.artist}`);
 
         // Validar que el videoId sea de YouTube (no de Deezer, Spotify, etc.)
-        const isValidYouTubeId = track.videoId && 
-                                typeof track.videoId === 'string' &&
-                                !track.videoId.startsWith('deezer_') && 
-                                !track.videoId.startsWith('spotify_') && 
-                                !track.videoId.startsWith('itunes_');
+        const isValidYouTubeId = track.videoId &&
+            typeof track.videoId === 'string' &&
+            !track.videoId.startsWith('deezer_') &&
+            !track.videoId.startsWith('spotify_') &&
+            !track.videoId.startsWith('itunes_');
 
         if (isValidYouTubeId) {
-            console.log(`✅ [YouTube] Using existing videoId: ${track.videoId}`);
             return {
                 videoId: track.videoId,
                 audioUrl: null, // Se resolverá con Piped/Invidious
@@ -320,7 +305,7 @@ class YouTubeProvider {
 
         // PHASE 1: Create cache key from track metadata
         const cacheKey = `${track.artist || ''}-${track.title || ''}`.toLowerCase().replace(/[^a-z0-9]/g, '');
-        
+
         // PHASE 1: Check persistent cache first (0 quota cost)
         const cachedVideoId = getPersistentCache(cacheKey);
         if (cachedVideoId) {
@@ -337,17 +322,14 @@ class YouTubeProvider {
 
         // PHASE 2: Check if we should use fallback methods
         if (shouldUseFallback(this.config.apiKey)) {
-            console.log('🔄 [YouTube] Using fallback methods (no API key or quota exceeded)');
-            
+
             try {
                 const fallbackResult = await findVideoIdWithFallback(searchQuery);
-                
+
                 if (fallbackResult?.videoId) {
                     // Save to persistent cache
                     setPersistentCache(cacheKey, fallbackResult.videoId);
-                    
-                    console.log(`✅ [YouTube] Fallback found videoId: ${fallbackResult.videoId}`);
-                    
+
                     return {
                         videoId: fallbackResult.videoId,
                         audioUrl: null,
@@ -360,7 +342,7 @@ class YouTubeProvider {
             } catch (fallbackError) {
                 console.error('❌ [YouTube] Fallback methods failed:', fallbackError.message);
             }
-            
+
             // If fallback fails and no API key, throw error
             if (!this.config.apiKey) {
                 throw new Error('YouTube API key not configured and fallback methods failed');
@@ -368,8 +350,7 @@ class YouTubeProvider {
         }
 
         // PHASE 2: Try official API if available
-        console.log(`🔎 [YouTube] API call for: "${searchQuery}" (100 quota cost)`);
-        
+
         try {
             // PHASE 1: Optimized API call - minimal parameters
             const data = await this.request('/search', {
@@ -395,8 +376,6 @@ class YouTubeProvider {
             // PHASE 1: Save to persistent cache
             setPersistentCache(cacheKey, videoId);
 
-            console.log(`✅ [YouTube] Found and cached videoId: ${videoId}`);
-
             return {
                 videoId,
                 audioUrl: null, // Se resolverá con Piped/Invidious
@@ -410,17 +389,15 @@ class YouTubeProvider {
                 console.error('🚨 [YouTube] QUOTA EXCEEDED - Switching to fallback');
                 try {
                     localStorage.setItem('youtube_quota_exceeded', Date.now().toString());
-                } catch (e) {}
-                
+                } catch (e) { }
+
                 // Try fallback methods as last resort
                 try {
                     const fallbackResult = await findVideoIdWithFallback(searchQuery);
-                    
+
                     if (fallbackResult?.videoId) {
                         setPersistentCache(cacheKey, fallbackResult.videoId);
-                        
-                        console.log(`✅ [YouTube] Fallback rescued: ${fallbackResult.videoId}`);
-                        
+
                         return {
                             videoId: fallbackResult.videoId,
                             audioUrl: null,
@@ -434,10 +411,10 @@ class YouTubeProvider {
                 } catch (fallbackError) {
                     console.error('❌ [YouTube] Fallback also failed:', fallbackError.message);
                 }
-                
+
                 throw new Error('YouTube API quota exceeded and fallback methods failed');
             }
-            
+
             console.error(`❌ [YouTube] Error getting audio stream:`, error.message);
             throw error;
         }
@@ -447,7 +424,6 @@ class YouTubeProvider {
      * Obtener trending videos musicales
      */
     async getTrending(limit = 50) {
-        console.log('📈 [YouTube] Getting trending music videos');
 
         const data = await this.request('/videos', {
             part: 'snippet',
@@ -462,7 +438,6 @@ class YouTubeProvider {
             id: { videoId: video.id },
         })) || [];
 
-        console.log(`✅ [YouTube] Found ${tracks.length} trending videos`);
         return tracks;
     }
 
@@ -470,7 +445,6 @@ class YouTubeProvider {
      * Obtener detalles de un video (incluyendo duración)
      */
     async getVideoDetails(videoId) {
-        console.log(`📹 [YouTube] Getting video details: ${videoId}`);
 
         const data = await this.request('/videos', {
             part: 'snippet,contentDetails',
@@ -482,7 +456,7 @@ class YouTubeProvider {
         }
 
         const video = data.items[0];
-        
+
         // Parsear duración ISO 8601 (PT1M30S -> 90 segundos)
         const duration = this.parseDuration(video.contentDetails.duration);
 
@@ -500,7 +474,7 @@ class YouTubeProvider {
      */
     parseDuration(duration) {
         const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-        
+
         if (!match) return 0;
 
         const hours = parseInt(match[1]) || 0;
@@ -511,4 +485,5 @@ class YouTubeProvider {
     }
 }
 
-export default new YouTubeProvider();
+const youTubeProvider = new YouTubeProvider();
+export default youTubeProvider;

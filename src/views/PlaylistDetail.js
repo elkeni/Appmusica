@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMusic } from '../hooks/useMusic';
 import { usePlayer } from '../context/PlayerContext';
-import SongCard from '../components/shared/SongCard';
+import { SongCard } from '../components/shared';
 import { getItemId } from '../utils/formatUtils';
 
 export default function PlaylistDetail({ favorites, toggleFavorite, onAddPlaylist }) {
@@ -41,6 +41,7 @@ export default function PlaylistDetail({ favorites, toggleFavorite, onAddPlaylis
       }
     };
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (loading) return <div className="flex items-center justify-center h-full"><div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div></div>;
