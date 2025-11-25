@@ -123,7 +123,7 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
     if (!currentTrack) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex bg-black text-white overflow-hidden">
+        <div className="fixed inset-0 z-50 flex text-white overflow-hidden" style={{ backgroundColor: '#1a1f2e' }}>
             {/* Dynamic Background - Animated Gradient Mesh */}
             <div
                 className="absolute inset-0 transition-colors duration-1000 ease-in-out"
@@ -132,11 +132,11 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
                         radial-gradient(circle at 20% 50%, ${colors.primary}40 0%, transparent 50%),
                         radial-gradient(circle at 80% 50%, ${colors.secondary}40 0%, transparent 50%),
                         radial-gradient(circle at 50% 80%, ${colors.primary}20 0%, transparent 70%),
-                        linear-gradient(180deg, #000000 0%, #0a0a0a 100%)
+                        linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%)
                     `
                 }}
             />
-            <div className="absolute inset-0 backdrop-blur-[80px] bg-black/40" />
+            <div className="absolute inset-0 backdrop-blur-[80px]" style={{ backgroundColor: 'rgba(26, 31, 46, 0.4)' }} />
 
             {/* MOBILE LAYOUT (< md) */}
             <div 
@@ -275,7 +275,11 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
                             e.stopPropagation();
                             toggleFavorite(currentTrack.originalData || currentTrack);
                         }}
-                        className={`p-3 rounded-full transition-all ${isFavorite ? 'text-green-500 bg-green-500/10 scale-110' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                        className="p-3 rounded-full transition-all"
+                        style={{ 
+                            color: isFavorite ? '#5edb5e' : 'rgba(255, 255, 255, 0.4)',
+                            backgroundColor: isFavorite ? 'rgba(94, 219, 94, 0.1)' : 'transparent'
+                        }}
                     >
                         <Heart size={28} fill={isFavorite ? "currentColor" : "none"} />
                     </button>
@@ -283,13 +287,16 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
 
                 {/* Progress Bar */}
                 <div className="mb-6 group">
-                    <div className="relative h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer group-hover:h-2 transition-all">
+                    <div className="relative h-1.5 rounded-full overflow-hidden cursor-pointer group-hover:h-2 transition-all" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
                         <div
-                            className="absolute top-0 left-0 h-full bg-white rounded-full"
-                            style={{ width: `${progressPercent}%` }}
+                            className="absolute top-0 left-0 h-full rounded-full"
+                            style={{ 
+                                width: `${progressPercent}%`,
+                                backgroundColor: '#5edb5e'
+                            }}
                         />
                     </div>
-                    <div className="flex justify-between mt-2 text-xs font-medium text-white/50">
+                    <div className="flex justify-between mt-2 text-xs font-medium" style={{ color: '#9ca3af' }}>
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
                     </div>
@@ -310,7 +317,8 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
 
                     <button
                         onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
-                        className="w-16 h-16 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 transition-transform shadow-xl z-50"
+                        className="w-16 h-16 flex items-center justify-center text-black rounded-full hover:scale-105 transition-transform shadow-xl z-50"
+                        style={{ backgroundColor: '#5edb5e' }}
                     >
                         {isPlaying ? (
                             <Pause size={32} fill="currentColor" />
@@ -335,13 +343,23 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
                 <div className="flex items-center justify-center gap-6 pb-2">
                     <button
                         onClick={() => setActiveView(activeView === 'lyrics' ? 'artwork' : 'lyrics')}
-                        className={`p-3 rounded-xl transition-all ${activeView === 'lyrics' ? 'bg-white/20 text-white scale-110' : 'text-white/40 hover:text-white'}`}
+                        className="p-3 rounded-xl transition-all"
+                        style={{ 
+                            backgroundColor: activeView === 'lyrics' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                            color: activeView === 'lyrics' ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
+                            transform: activeView === 'lyrics' ? 'scale(1.1)' : 'scale(1)'
+                        }}
                     >
                         <Quote size={22} />
                     </button>
                     <button
                         onClick={() => setActiveView(activeView === 'queue' ? 'artwork' : 'queue')}
-                        className={`p-3 rounded-xl transition-all ${activeView === 'queue' ? 'bg-white/20 text-white scale-110' : 'text-white/40 hover:text-white'}`}
+                        className="p-3 rounded-xl transition-all"
+                        style={{ 
+                            backgroundColor: activeView === 'queue' ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+                            color: activeView === 'queue' ? '#ffffff' : 'rgba(255, 255, 255, 0.4)',
+                            transform: activeView === 'queue' ? 'scale(1.1)' : 'scale(1)'
+                        }}
                     >
                         <ListMusic size={22} />
                     </button>

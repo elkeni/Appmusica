@@ -25,7 +25,10 @@ export default function PlayerBar({ onOpenMobile }) {
     const isFav = isFavorite(currentTrack);
 
     return (
-        <div className="bg-black/95 backdrop-blur-xl border-t border-white/10 px-4 py-3">
+        <div className="backdrop-blur-xl px-4 py-3" style={{ 
+            backgroundColor: '#262d3d',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
             <div className="max-w-screen-2xl mx-auto grid grid-cols-3 items-center gap-4">
                 {/* Left: Track Info */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -46,9 +49,10 @@ export default function PlayerBar({ onOpenMobile }) {
                     </div>
                     <button 
                         onClick={() => toggleFavorite(currentTrack)}
-                        className={`flex-shrink-0 transition-colors ${
-                            isFav ? 'text-green-500' : 'text-gray-400 hover:text-green-500'
-                        }`}
+                        className="flex-shrink-0 transition-colors"
+                        style={{ color: isFav ? '#5edb5e' : '#9ca3af' }}
+                        onMouseEnter={(e) => !isFav && (e.currentTarget.style.color = '#5edb5e')}
+                        onMouseLeave={(e) => !isFav && (e.currentTarget.style.color = '#9ca3af')}
                     >
                         <Heart size={20} fill={isFav ? 'currentColor' : 'none'} />
                     </button>
@@ -59,14 +63,18 @@ export default function PlayerBar({ onOpenMobile }) {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={prevTrack}
-                            className="text-gray-400 hover:text-white transition-colors"
+                            className="transition-colors"
+                            style={{ color: '#9ca3af' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                         >
                             <SkipBack size={20} />
                         </button>
                         
                         <button
                             onClick={togglePlayPause}
-                            className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                            className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                            style={{ backgroundColor: '#5edb5e' }}
                         >
                             {isPlaying ? (
                                 <Pause size={20} className="text-black" fill="currentColor" />
@@ -77,7 +85,10 @@ export default function PlayerBar({ onOpenMobile }) {
                         
                         <button
                             onClick={nextTrack}
-                            className="text-gray-400 hover:text-white transition-colors"
+                            className="transition-colors"
+                            style={{ color: '#9ca3af' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                         >
                             <SkipForward size={20} />
                         </button>
@@ -89,7 +100,8 @@ export default function PlayerBar({ onOpenMobile }) {
                             {formatTime(currentTime)}
                         </span>
                         <div
-                            className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden cursor-pointer group"
+                            className="flex-1 h-1 rounded-full overflow-hidden cursor-pointer group"
+                            style={{ backgroundColor: '#374151' }}
                             onClick={(e) => {
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const clickX = e.clientX - rect.left;
@@ -98,8 +110,11 @@ export default function PlayerBar({ onOpenMobile }) {
                             }}
                         >
                             <div
-                                className="h-full bg-green-500 relative group-hover:bg-green-400 transition-colors"
-                                style={{ width: `${progressPercent}%` }}
+                                className="h-full relative transition-colors"
+                                style={{ 
+                                    width: `${progressPercent}%`,
+                                    backgroundColor: '#5edb5e'
+                                }}
                             >
                                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 shadow-lg" />
                             </div>
@@ -112,7 +127,7 @@ export default function PlayerBar({ onOpenMobile }) {
 
                 {/* Right: Volume */}
                 <div className="flex items-center justify-end gap-3">
-                    <Volume2 size={20} className="text-gray-400" />
+                    <Volume2 size={20} style={{ color: '#9ca3af' }} />
                     <input
                         type="range"
                         min="0"
@@ -120,7 +135,8 @@ export default function PlayerBar({ onOpenMobile }) {
                         step="0.01"
                         value={volume}
                         onChange={(e) => setVolume(parseFloat(e.target.value))}
-                        className="w-24 accent-green-500 cursor-pointer"
+                        className="w-24 cursor-pointer"
+                        style={{ accentColor: '#5edb5e' }}
                     />
                 </div>
             </div>

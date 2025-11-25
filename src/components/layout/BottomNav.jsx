@@ -1,16 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Heart, User } from 'lucide-react';
+import { Home, Search, Music, ListMusic } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 
 export default function BottomNav({ onOpenPlayer }) {
     const { currentTrack, isPlaying } = usePlayer();
 
     const navItems = [
-        { icon: Home, label: 'Inicio', path: '/' },
-        { icon: Search, label: 'Buscar', path: '/search' },
-        { icon: Heart, label: 'Favoritos', path: '/favorites' },
-        { icon: User, label: 'Perfil', path: '/profile' },
+        { icon: Home, label: 'Home', path: '/' },
+        { icon: Search, label: 'Search', path: '/search' },
+        { icon: Music, label: 'Library', path: '/library' },
+        { icon: ListMusic, label: 'Queue', path: '/library' },
     ];
 
     return (
@@ -19,7 +19,11 @@ export default function BottomNav({ onOpenPlayer }) {
             {currentTrack && (
                 <div
                     onClick={onOpenPlayer}
-                    className="bg-gradient-to-r from-[#1a1a1a] to-[#121212] backdrop-blur-xl border-t border-white/10 px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
+                    className="backdrop-blur-xl px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
+                    style={{ 
+                        backgroundColor: '#262d3d',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
                 >
                     <img
                         src={currentTrack.image || 'https://via.placeholder.com/48'}
@@ -31,29 +35,29 @@ export default function BottomNav({ onOpenPlayer }) {
                         <p className="text-sm font-semibold text-white truncate">
                             {currentTrack.title || 'Unknown Track'}
                         </p>
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="text-xs truncate" style={{ color: '#9ca3af' }}>
                             {currentTrack.artist || 'Unknown Artist'}
                         </p>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPlaying ? 'bg-green-500 animate-pulse' : 'bg-gray-700'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`} style={{ backgroundColor: isPlaying ? '#5edb5e' : '#374151' }}>
                         <div className="w-3 h-3 border-2 border-white rounded-full" />
                     </div>
                 </div>
             )}
 
             {/* Bottom Navigation */}
-            <nav className="bg-black/95 backdrop-blur-xl border-t border-white/10 px-2 py-2 flex items-center justify-around pb-safe">
+            <nav className="backdrop-blur-xl px-2 py-2 flex items-center justify-around pb-safe" style={{ 
+                backgroundColor: '#0f1419',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all ${
-                                isActive
-                                    ? 'text-green-500'
-                                    : 'text-gray-400'
-                            }`
-                        }
+                        className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all"
+                        style={({ isActive }) => ({
+                            color: isActive ? '#5edb5e' : '#9ca3af'
+                        })}
                     >
                         <item.icon size={24} />
                         <span className="text-xs font-medium">{item.label}</span>

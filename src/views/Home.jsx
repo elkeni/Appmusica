@@ -1,56 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, ChevronRight, TrendingUp, Sparkles, Clock } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
-import { useMusic } from '../hooks/useMusic';
 import { usePageTransition } from '../hooks/useAnimations';
-import { LoadingSkeleton, FadeInContainer, StaggerContainer } from '../components/shared';
+import { FadeInContainer } from '../components/shared';
+
+// Sample data matching the design
+const recentlyPlaysData = [
+    { id: 1, title: 'Music of the Spheres', artist: 'Coldplay', image: 'https://i.scdn.co/image/ab67616d0000b2732d0705ff38f7813ace4bd99d' },
+    { id: 2, title: 'Native', artist: 'OneRepublic', image: 'https://i.scdn.co/image/ab67616d0000b273dd2a8b5f1fa67e90b7e1e754' },
+    { id: 3, title: 'Evolve', artist: 'Imagine Dragons', image: 'https://i.scdn.co/image/ab67616d0000b273da6f73a25f4c79d0e6b4a8bd' },
+    { id: 4, title: 'Starboy', artist: 'The Weeknd', image: 'https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452' },
+];
+
+const trendingData = [
+    { id: 't1', title: 'Rodrigo', artist: 'Trolaz Olivia', duration: '3:48', image: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' },
+    { id: 't2', title: 'Heat Waves', artist: 'Glass Animals', duration: '3:58', image: 'https://i.scdn.co/image/ab67616d0000b273c8b444df094279e70d0ed856' },
+    { id: 't3', title: 'Kiss Me More', artist: 'Doja Cat ft. SZA', duration: '3:23', image: 'https://i.scdn.co/image/ab67616d0000b273be841ba4bc24340152e3a79a' },
+    { id: 't4', title: 'Save Your Tears', artist: 'The Weeknd', duration: '3:35', image: 'https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452' },
+    { id: 't5', title: 'Higher Power', artist: 'Coldplay', duration: '3:29', image: 'https://i.scdn.co/image/ab67616d0000b2732d0705ff38f7813ace4bd99d' },
+];
+
+const topPlaylistsData = [
+    { id: 'p1', title: 'LO-FI Beats', description: 'Chill vibes for work and study', image: 'https://i.scdn.co/image/ab67706f00000002739dd68675c94f3dc0fd2326' },
+    { id: 'p2', title: '90s Rock', description: 'Best rock hits from the 90s', image: 'https://i.scdn.co/image/ab67706f00000002d073e656e546e43bc387ad79' },
+    { id: 'p3', title: 'Pop Hits', description: 'Top pop songs right now', image: 'https://i.scdn.co/image/ab67706f00000002f0a25cf8f426309572e125cb' },
+    { id: 'p4', title: 'Workout Mix', description: 'High energy tracks', image: 'https://i.scdn.co/image/ab67706f00000002d3c9b2ca6d62d9b7e90fc3b2' },
+];
 
 export default function Home() {
     const navigate = useNavigate();
     const { playItem } = usePlayer();
     const { user } = useAuth();
-    const { getTrending } = useMusic();
     
     usePageTransition();
     
-    const [heroItems, setHeroItems] = useState([]);
-    const [trending, setTrending] = useState([]);
-    const [recommended, setRecommended] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        loadContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const loadContent = async () => {
-        try {
-            const trendingData = await getTrending(30);
-            
-            setHeroItems(trendingData.slice(0, 6));
-            setTrending(trendingData.slice(6, 18));
-            setRecommended(trendingData.slice(18, 30));
-        } catch (error) {
-            console.error('Error loading home content:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [heroItems] = useState(recentlyPlaysData);
+    const [trending] = useState(trendingData);
+    const [recommended] = useState(topPlaylistsData);
+    const [loading] = useState(false);
 
     if (loading) {
         return (
             <div className="px-4 md:px-8 py-6 space-y-8">
                 <div className="flex items-center justify-between mb-8">
-                    <div className="h-10 w-48 bg-gray-800 rounded animate-pulse" />
-                    <div className="w-10 h-10 bg-gray-800 rounded-full animate-pulse" />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <LoadingSkeleton type="hero" count={6} />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <LoadingSkeleton type="card" count={12} />
+                    <div className="h-10 w-48 rounded animate-pulse" style={{ backgroundColor: '#262d3d' }} />
+                    <div className="w-10 h-10 rounded-full animate-pulse" style={{ backgroundColor: '#262d3d' }} />
                 </div>
             </div>
         );
@@ -58,197 +54,138 @@ export default function Home() {
 
     return (
         <div className="px-4 md:px-8 py-6 space-y-8 page-transition">
-            {/* Header */}
+            {/* Header with Search */}
             <FadeInContainer delay={0.1}>
                 <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-1">
-                        {getGreeting()}
-                    </h1>
-                    <p className="text-gray-400 text-sm">
-                        Descubre música nueva cada día
-                    </p>
-                </div>
-                <button
-                    onClick={() => navigate('/profile')}
-                    className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/10 hover:ring-white/20 transition-all"
-                >
-                    <img
-                        src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}&background=1DB954&color=fff`}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                    />
-                </button>
-            </header>
+                    <div className="flex-1 max-w-2xl">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search for songs, artists, albums..."
+                                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none focus:ring-2 transition-all"
+                                style={{ 
+                                    backgroundColor: '#262d3d',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#4a90e2'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+                                onClick={() => navigate('/search')}
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => navigate('/profile')}
+                        className="ml-4 w-10 h-10 rounded-full overflow-hidden transition-all"
+                        style={{ border: '2px solid rgba(255, 255, 255, 0.1)' }}
+                    >
+                        <img
+                            src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}&background=5edb5e&color=fff`}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                        />
+                    </button>
+                </header>
             </FadeInContainer>
 
-            {/* Hero Grid - Featured */}
+            {/* Recently Plays */}
             <FadeInContainer delay={0.2}>
                 <section>
-                    <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {heroItems.map((item) => (
-                        <HeroCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, heroItems)}
-                        />
-                    ))}
-                    </StaggerContainer>
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: '#ffffff' }}>Recently plays</h2>
+                    <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+                        {heroItems.map((item) => (
+                            <div
+                                key={item.id}
+                                className="flex-shrink-0 cursor-pointer group"
+                                style={{ width: '200px' }}
+                                onClick={() => playItem(item, heroItems)}
+                            >
+                                <div className="relative aspect-square rounded-lg overflow-hidden mb-3" style={{ backgroundColor: '#262d3d' }}>
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl" style={{ backgroundColor: '#5edb5e' }}>
+                                            <Play size={24} className="text-black ml-1" fill="currentColor" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <h3 className="font-semibold text-white text-sm mb-1 truncate">{item.title}</h3>
+                                <p className="text-xs truncate" style={{ color: '#9ca3af' }}>{item.artist}</p>
+                            </div>
+                        ))}
+                    </div>
                 </section>
             </FadeInContainer>
 
-            {/* Trending Section */}
+            {/* Trending */}
             <FadeInContainer delay={0.3}>
                 <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <TrendingUp className="text-green-500" size={24} />
-                        Tendencias
-                    </h2>
-                    <button 
-                        onClick={() => navigate('/search')}
-                        className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
-                    >
-                        Ver todo <ChevronRight size={16} />
-                    </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {trending.map((item) => (
-                        <AlbumCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, trending)}
-                            onClick={() => {
-                                if (item.artist?.id) {
-                                    navigate(`/artist/${item.artist.id}`);
-                                }
-                            }}
-                        />
-                    ))}
-                </div>
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: '#ffffff' }}>Trending</h2>
+                    <div className="space-y-2">
+                        {trending.map((item, index) => (
+                            <div
+                                key={item.id}
+                                className="flex items-center gap-4 p-3 rounded-lg cursor-pointer group transition-all"
+                                style={{ backgroundColor: 'transparent' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#262d3d'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                onClick={() => playItem(item, trending)}
+                            >
+                                <div className="relative flex-shrink-0">
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="w-14 h-14 rounded-lg object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                                        <Play size={20} className="text-white" fill="currentColor" />
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-semibold text-white text-sm truncate">{item.title}</h3>
+                                    <p className="text-xs truncate" style={{ color: '#9ca3af' }}>{item.artist}</p>
+                                </div>
+                                <span className="text-sm" style={{ color: '#9ca3af' }}>{item.duration}</span>
+                            </div>
+                        ))}
+                    </div>
                 </section>
             </FadeInContainer>
 
-            {/* Recommended Section */}
+            {/* Top Playlists */}
             <FadeInContainer delay={0.4}>
                 <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Sparkles className="text-green-500" size={24} />
-                        Recomendado para ti
-                    </h2>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {recommended.map((item) => (
-                        <AlbumCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, recommended)}
-                            onClick={() => {
-                                if (item.artist?.id) {
-                                    navigate(`/artist/${item.artist.id}`);
-                                }
-                            }}
-                        />
-                    ))}
-                </div>
-                </section>
-            </FadeInContainer>
-
-            {/* Recently Played */}
-            <FadeInContainer delay={0.5}>
-                <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Clock className="text-green-500" size={24} />
-                        Escuchado recientemente
-                    </h2>
-                </div>
-                <div className="bg-white/5 rounded-lg p-6 text-center">
-                    <Clock size={48} className="mx-auto text-gray-600 mb-3" />
-                    <p className="text-gray-400 text-sm">
-                        Tus canciones recientes aparecerán aquí
-                    </p>
-                </div>
-                </section>
-            </FadeInContainer>
-        </div>
-    );
-}
-
-// Helper Components
-function HeroCard({ item, onPlay }) {
-    const [imageError, setImageError] = useState(false);
-    
-    return (
-        <div
-            onClick={onPlay}
-            className="group relative aspect-video rounded-lg overflow-hidden cursor-pointer bg-gradient-to-br from-gray-800 to-gray-900 hover:scale-105 transition-transform shadow-lg"
-        >
-            {!imageError ? (
-                <img
-                    src={item.image || item.cover}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:opacity-70 transition-opacity"
-                    onError={() => setImageError(true)}
-                />
-            ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-900 to-green-950">
-                    <Sparkles size={48} className="text-green-500/30" />
-                </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-base md:text-lg mb-1 line-clamp-1">{item.title}</h3>
-                    <p className="text-xs text-gray-300 line-clamp-1">{item.artist}</p>
-                </div>
-            </div>
-            <div className="absolute top-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
-                <Play size={20} className="text-black ml-1" fill="currentColor" />
-            </div>
-        </div>
-    );
-}
-
-function AlbumCard({ item, onPlay, onClick }) {
-    const [imageError, setImageError] = useState(false);
-    
-    return (
-        <div className="group cursor-pointer" onClick={onClick}>
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-gray-800 shadow-md">
-                {!imageError ? (
-                    <img
-                        src={item.image || item.cover}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={() => setImageError(true)}
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                        <Sparkles size={32} className="text-gray-600" />
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: '#ffffff' }}>Top playlists for you</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {recommended.map((item) => (
+                            <div
+                                key={item.id}
+                                className="cursor-pointer group"
+                                onClick={() => navigate('/library')}
+                            >
+                                <div className="relative aspect-square rounded-lg overflow-hidden mb-3" style={{ backgroundColor: '#262d3d' }}>
+                                    <img
+                                        src={item.image}
+                                        alt={item.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl" style={{ backgroundColor: '#5edb5e' }}>
+                                            <Play size={24} className="text-black ml-1" fill="currentColor" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <h3 className="font-semibold text-white text-sm mb-1 truncate">{item.title}</h3>
+                                <p className="text-xs truncate" style={{ color: '#9ca3af' }}>{item.description}</p>
+                            </div>
+                        ))}
                     </div>
-                )}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onPlay();
-                    }}
-                    className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
-                >
-                    <Play size={20} className="text-black ml-1" fill="currentColor" />
-                </button>
-            </div>
-            <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-green-500 transition-colors">
-                {item.title}
-            </h3>
-            <p className="text-xs text-gray-400 truncate">{item.artist}</p>
+                </section>
+            </FadeInContainer>
         </div>
     );
 }
 
-function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
-    return 'Buenas noches';
-}
+
