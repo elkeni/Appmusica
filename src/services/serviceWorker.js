@@ -3,6 +3,8 @@
  * Utilidad para registrar y gestionar el Service Worker
  */
 
+import { useState, useEffect } from 'react';
+
 const SW_PATH = '/service-worker.js';
 
 /**
@@ -20,20 +22,34 @@ export async function registerServiceWorker() {
         console.warn('⚠️ Service Workers not supported in this browser');
         return null;
     }
-    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-        console.log('🆕 New Service Worker available');
 
-        // Notificar al usuario que hay una actualización
-        notifyUpdate(registration);
-    }
-});
+    try {
+        const registration = await navigator.serviceWorker.register(SW_PATH);
+        console.log('✅ Service Worker registered:', registration);
+
+        // Escuchar actualizaciones
+        registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+
+            if (!newWorker) {
+                return;
+            }
+
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    console.log('🆕 New Service Worker available');
+
+                    // Notificar al usuario que hay una actualización
+                    notifyUpdate(registration);
+                }
+            });
         });
 
-return registration;
+        return registration;
     } catch (error) {
-    console.error('❌ Service Worker registration failed:', error);
-    return null;
-}
+        console.error('❌ Service Worker registration failed:', error);
+        return null;
+    }
 }
 
 /**
@@ -138,8 +154,6 @@ export function onConnectivityChange(callback) {
 /**
  * Hook de React para detectar conectividad
  */
-import { useState, useEffect } from 'react';
-
 export function useOnlineStatus() {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -157,20 +171,21 @@ export function useOnlineStatus() {
 function notifyUpdate(registration) {
     // Importar toast service de forma dinámica para evitar dependencia circular
     import('./toastService').then(({ default: toastService }) => {
-        const toastId = toastService.info(
+        toastService.info(
             'Nueva versión disponible. Recarga la página para actualizar.',
             0 // No auto-cerrar
         );
 
-        // Agregar listener para recargar
-        const handleReload = () => {
-            if (registration.waiting) {
-                registration.waiting.postMessage({ action: 'SKIP_WAITING' });
+        // Skip waiting y recargar cuando se active el nuevo service worker
+        if (registration.waiting) {
+            registration.waiting.postMessage({ action: 'SKIP_WAITING' });
+            // Recargar la página cuando el nuevo worker tome control
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
                 window.location.reload();
-            }
-        };
+            });
+        }
 
-        // Esto es conceptual - necesitarías modificar el toast para soportar acciones
+        // Log para desarrollo
         console.log('💡 Tip: Reload the page to get the latest version');
     }).catch(err => {
         console.error('Failed to import toast service:', err);
@@ -188,10 +203,12 @@ if (process.env.NODE_ENV === 'production') {
     }
 }
 
-export default {
+const serviceWorkerManager = {
     register: registerServiceWorker,
     unregister: unregisterServiceWorker,
     update: updateServiceWorker,
     clearCache: clearServiceWorkerCache,
     isSupported: isServiceWorkerSupported,
 };
+
+export default serviceWorkerManager;
