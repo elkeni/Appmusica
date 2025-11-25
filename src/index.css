@@ -11,18 +11,26 @@
    RESET & VARIABLES CSS
    ======================================== */
 :root {
-  /* Paleta YTM - Modo Oscuro */
-  --ytm-base: #030303;
-  --ytm-surface-1: rgba(24, 24, 24, 0.9);
-  --ytm-surface-2: #212121;
-  --ytm-text-primary: #ffffff;
-  --ytm-text-secondary: #aaaaaa;
-  --ytm-accent: #ff0000;
-  --ytm-hover: #303030;
+  /* Echo Music - Color Palette */
+  --echo-bg-primary: #1a1f2e;  /* Main background */
+  --echo-bg-sidebar: #0f1419;  /* Sidebar background */
+  --echo-bg-card: #262d3d;     /* Card background */
+  --echo-accent-blue: #4a90e2; /* Blue accent */
+  --echo-primary-green: #5edb5e; /* Primary button/play */
+  --echo-text-primary: #ffffff;
+  --echo-text-secondary: #9ca3af;
+  --echo-border: rgba(255, 255, 255, 0.1);
   
-  /* Otros */
+  /* Legacy variables for compatibility */
+  --ytm-base: #1a1f2e;
+  --ytm-surface-1: #262d3d;
+  --ytm-surface-2: #0f1419;
+  --ytm-text-primary: #ffffff;
+  --ytm-text-secondary: #9ca3af;
+  --ytm-accent: #5edb5e;
+  --ytm-hover: #262d3d;
   --ytm-glass-blur: 12px;
-  --ytm-border-radius: 8px;
+  --ytm-border-radius: 12px;
 }
 
 * {
@@ -36,10 +44,10 @@ html {
 }
 
 body {
-  background-color: #030303;
+  background-color: #1a1f2e;
   margin: 0;
   font-family: 'Roboto', sans-serif;
-  color: var(--ytm-text-primary);
+  color: var(--echo-text-primary);
   line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;

@@ -18,9 +18,9 @@ export default function MainLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col md:flex-row overflow-hidden">
+        <div className="min-h-screen text-white flex flex-col md:flex-row overflow-hidden" style={{ backgroundColor: '#1a1f2e' }}>
             {/* SIDEBAR - Desktop Only */}
-            <aside className="hidden md:flex md:w-64 lg:w-72 flex-shrink-0 flex-col h-screen border-r border-white/10">
+            <aside className="hidden md:flex md:w-64 lg:w-72 flex-shrink-0 flex-col h-screen" style={{ borderRight: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <Sidebar />
             </aside>
 
