@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, ChevronRight, TrendingUp, Sparkles, Clock } from 'lucide-react';
+import { Play, ChevronRight, TrendingUp, Clock, Search, ChevronDown } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import { useMusic } from '../hooks/useMusic';
@@ -15,9 +15,9 @@ export default function Home() {
     
     usePageTransition();
     
-    const [heroItems, setHeroItems] = useState([]);
+    const [recentlyPlayed, setRecentlyPlayed] = useState([]);
     const [trending, setTrending] = useState([]);
-    const [recommended, setRecommended] = useState([]);
+    const [topPlaylists, setTopPlaylists] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -29,9 +29,9 @@ export default function Home() {
         try {
             const trendingData = await getTrending(30);
             
-            setHeroItems(trendingData.slice(0, 6));
-            setTrending(trendingData.slice(6, 18));
-            setRecommended(trendingData.slice(18, 30));
+            setRecentlyPlayed(trendingData.slice(0, 6));
+            setTrending(trendingData.slice(6, 16));
+            setTopPlaylists(trendingData.slice(16, 22));
         } catch (error) {
             console.error('Error loading home content:', error);
         } finally {
@@ -41,191 +41,167 @@ export default function Home() {
 
     if (loading) {
         return (
-            <div className="px-4 md:px-8 py-6 space-y-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="h-10 w-48 bg-gray-800 rounded animate-pulse" />
-                    <div className="w-10 h-10 bg-gray-800 rounded-full animate-pulse" />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <LoadingSkeleton type="hero" count={6} />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <LoadingSkeleton type="card" count={12} />
+            <div className="min-h-screen bg-[#1a1d2e]">
+                <Header user={user} navigate={navigate} />
+                <div className="px-6 md:px-12 py-6 space-y-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <LoadingSkeleton type="card" count={6} />
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="px-4 md:px-8 py-6 space-y-8 page-transition">
-            {/* Header */}
-            <FadeInContainer delay={0.1}>
-                <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-bold mb-1">
-                        {getGreeting()}
-                    </h1>
-                    <p className="text-gray-400 text-sm">
-                        Descubre música nueva cada día
-                    </p>
-                </div>
-                <button
-                    onClick={() => navigate('/profile')}
-                    className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/10 hover:ring-white/20 transition-all"
-                >
-                    <img
-                        src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}&background=1DB954&color=fff`}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                    />
-                </button>
-            </header>
-            </FadeInContainer>
+        <div className="min-h-screen bg-[#1a1d2e]">
+            {/* Header with Search and Profile */}
+            <Header user={user} navigate={navigate} />
 
-            {/* Hero Grid - Featured */}
-            <FadeInContainer delay={0.2}>
-                <section>
-                    <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {heroItems.map((item) => (
-                        <HeroCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, heroItems)}
-                        />
-                    ))}
-                    </StaggerContainer>
-                </section>
-            </FadeInContainer>
+            <div className="px-6 md:px-12 py-6 space-y-10">
+                {/* Recently Plays Section */}
+                <FadeInContainer delay={0.1}>
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl md:text-[28px] font-bold text-white">
+                                Recently plays
+                            </h2>
+                            <button 
+                                onClick={() => navigate('/library')}
+                                className="text-sm text-[#b4b8c5] hover:text-white transition-colors flex items-center gap-1"
+                            >
+                                See all <ChevronRight size={16} />
+                            </button>
+                        </div>
+                        <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+                            {recentlyPlayed.map((item) => (
+                                <AlbumCard
+                                    key={item.id}
+                                    item={item}
+                                    onPlay={() => playItem(item, recentlyPlayed)}
+                                />
+                            ))}
+                        </StaggerContainer>
+                    </section>
+                </FadeInContainer>
 
-            {/* Trending Section */}
-            <FadeInContainer delay={0.3}>
-                <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <TrendingUp className="text-green-500" size={24} />
-                        Tendencias
-                    </h2>
-                    <button 
-                        onClick={() => navigate('/search')}
-                        className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
-                    >
-                        Ver todo <ChevronRight size={16} />
-                    </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {trending.map((item) => (
-                        <AlbumCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, trending)}
-                            onClick={() => {
-                                if (item.artist?.id) {
-                                    navigate(`/artist/${item.artist.id}`);
-                                }
-                            }}
-                        />
-                    ))}
-                </div>
-                </section>
-            </FadeInContainer>
+                {/* Trending Section */}
+                <FadeInContainer delay={0.2}>
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl md:text-[28px] font-bold text-white flex items-center gap-3">
+                                <TrendingUp className="text-[#4f9cf9]" size={28} />
+                                Trending
+                            </h2>
+                            <button 
+                                onClick={() => navigate('/search')}
+                                className="text-sm text-[#b4b8c5] hover:text-white transition-colors flex items-center gap-1"
+                            >
+                                See all <ChevronRight size={16} />
+                            </button>
+                        </div>
+                        <div className="space-y-2">
+                            {trending.map((item, index) => (
+                                <SongItem
+                                    key={item.id}
+                                    item={item}
+                                    index={index + 1}
+                                    onPlay={() => playItem(item, trending)}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                </FadeInContainer>
 
-            {/* Recommended Section */}
-            <FadeInContainer delay={0.4}>
-                <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Sparkles className="text-green-500" size={24} />
-                        Recomendado para ti
-                    </h2>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {recommended.map((item) => (
-                        <AlbumCard
-                            key={item.id}
-                            item={item}
-                            onPlay={() => playItem(item, recommended)}
-                            onClick={() => {
-                                if (item.artist?.id) {
-                                    navigate(`/artist/${item.artist.id}`);
-                                }
-                            }}
-                        />
-                    ))}
-                </div>
-                </section>
-            </FadeInContainer>
-
-            {/* Recently Played */}
-            <FadeInContainer delay={0.5}>
-                <section>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Clock className="text-green-500" size={24} />
-                        Escuchado recientemente
-                    </h2>
-                </div>
-                <div className="bg-white/5 rounded-lg p-6 text-center">
-                    <Clock size={48} className="mx-auto text-gray-600 mb-3" />
-                    <p className="text-gray-400 text-sm">
-                        Tus canciones recientes aparecerán aquí
-                    </p>
-                </div>
-                </section>
-            </FadeInContainer>
+                {/* Top Playlists Section */}
+                <FadeInContainer delay={0.3}>
+                    <section className="pb-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl md:text-[28px] font-bold text-white">
+                                Top playlists for you
+                            </h2>
+                            <button 
+                                onClick={() => navigate('/library')}
+                                className="text-sm text-[#b4b8c5] hover:text-white transition-colors flex items-center gap-1"
+                            >
+                                See all <ChevronRight size={16} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {topPlaylists.map((item, index) => (
+                                <PlaylistCard
+                                    key={item.id}
+                                    item={item}
+                                    songCount={Math.floor(Math.random() * 20) + 10}
+                                    duration={`${Math.floor(Math.random() * 2) + 1}hr ${Math.floor(Math.random() * 50) + 10}min`}
+                                    onPlay={() => playItem(item, topPlaylists)}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                </FadeInContainer>
+            </div>
         </div>
     );
 }
 
-// Helper Components
-function HeroCard({ item, onPlay }) {
+// Header Component with Search and Profile
+function Header({ user, navigate }) {
+    return (
+        <header className="sticky top-0 z-30 bg-[#1a1d2e]/80 backdrop-blur-lg border-b border-white/5">
+            <div className="flex items-center justify-between px-6 md:px-12 h-20">
+                {/* Search Bar */}
+                <div className="flex-1 flex justify-center max-w-md mx-auto">
+                    <div className="w-full bg-[#1e2139]/60 rounded-3xl px-5 py-3 flex items-center gap-3 border border-transparent focus-within:border-[#4f9cf9]/30 transition-all">
+                        <Search size={18} className="text-[#b4b8c5]" />
+                        <input
+                            type="text"
+                            placeholder="Search tracks, albums, artists..."
+                            className="bg-transparent border-none outline-none text-white text-sm flex-1 placeholder:text-[#b4b8c5]"
+                            onFocus={() => navigate('/search')}
+                        />
+                    </div>
+                </div>
+
+                {/* User Profile */}
+                <button
+                    onClick={() => navigate('/profile')}
+                    className="flex items-center gap-3 bg-[#1e2139]/80 rounded-3xl px-3 py-2 hover:bg-[#1e2139] transition-colors ml-4"
+                >
+                    <img
+                        src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'Taylor')}&background=4f9cf9&color=fff`}
+                        alt="Profile"
+                        className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-sm font-medium text-white hidden md:block">
+                        {user?.displayName || user?.email?.split('@')[0] || 'Taylor'}
+                    </span>
+                    <ChevronDown size={16} className="text-[#b4b8c5] hidden md:block" />
+                </button>
+            </div>
+        </header>
+    );
+}
+
+// Album Card Component
+function AlbumCard({ item, onPlay }) {
     const [imageError, setImageError] = useState(false);
     
     return (
         <div
             onClick={onPlay}
-            className="group relative aspect-video rounded-lg overflow-hidden cursor-pointer bg-gradient-to-br from-gray-800 to-gray-900 hover:scale-105 transition-transform shadow-lg"
+            className="group cursor-pointer"
         >
-            {!imageError ? (
-                <img
-                    src={item.image || item.cover}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:opacity-70 transition-opacity"
-                    onError={() => setImageError(true)}
-                />
-            ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-900 to-green-950">
-                    <Sparkles size={48} className="text-green-500/30" />
-                </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-base md:text-lg mb-1 line-clamp-1">{item.title}</h3>
-                    <p className="text-xs text-gray-300 line-clamp-1">{item.artist}</p>
-                </div>
-            </div>
-            <div className="absolute top-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-xl">
-                <Play size={20} className="text-black ml-1" fill="currentColor" />
-            </div>
-        </div>
-    );
-}
-
-function AlbumCard({ item, onPlay, onClick }) {
-    const [imageError, setImageError] = useState(false);
-    
-    return (
-        <div className="group cursor-pointer" onClick={onClick}>
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-gray-800 shadow-md">
+            <div className="relative aspect-square rounded-xl overflow-hidden mb-3 bg-[#1e2139] shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 {!imageError ? (
                     <img
                         src={item.image || item.cover}
                         alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                         onError={() => setImageError(true)}
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                        <Sparkles size={32} className="text-gray-600" />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e2139] to-[#0f1117]">
+                        <Clock size={32} className="text-[#4f9cf9]/30" />
                     </div>
                 )}
                 <button
@@ -233,22 +209,101 @@ function AlbumCard({ item, onPlay, onClick }) {
                         e.stopPropagation();
                         onPlay();
                     }}
-                    className="absolute bottom-2 right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute bottom-3 right-3 w-11 h-11 bg-[#4f9cf9] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110 hover:bg-[#3d8ae6]"
                 >
-                    <Play size={20} className="text-black ml-1" fill="currentColor" />
+                    <Play size={18} className="text-white ml-0.5" fill="currentColor" />
                 </button>
             </div>
-            <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-green-500 transition-colors">
+            <h3 className="font-semibold text-sm text-white mb-1 truncate group-hover:text-[#4f9cf9] transition-colors">
                 {item.title}
             </h3>
-            <p className="text-xs text-gray-400 truncate">{item.artist}</p>
+            <p className="text-sm text-[#b4b8c5] truncate">{item.artist}</p>
         </div>
     );
 }
 
-function getGreeting() {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
-    return 'Buenas noches';
+// Song Item Component for Trending
+function SongItem({ item, index, onPlay }) {
+    const [imageError, setImageError] = useState(false);
+    
+    return (
+        <div
+            onClick={onPlay}
+            className="group flex items-center gap-4 p-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors cursor-pointer"
+        >
+            {/* Thumbnail */}
+            <div className="relative w-[60px] h-[60px] rounded-lg overflow-hidden flex-shrink-0 bg-[#1e2139]">
+                {!imageError ? (
+                    <img
+                        src={item.image || item.cover}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <Clock size={20} className="text-[#4f9cf9]/30" />
+                    </div>
+                )}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play size={20} className="text-white" fill="currentColor" />
+                </div>
+            </div>
+
+            {/* Title and Artist */}
+            <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-white text-sm truncate group-hover:text-[#4f9cf9] transition-colors">
+                    {item.title}
+                </h4>
+                <p className="text-sm text-[#b4b8c5] truncate">{item.artist}</p>
+            </div>
+
+            {/* Duration */}
+            <span className="text-sm text-[#b4b8c5] tabular-nums">
+                {item.duration || '3:45'}
+            </span>
+        </div>
+    );
+}
+
+// Playlist Card Component
+function PlaylistCard({ item, songCount, duration, onPlay }) {
+    const [imageError, setImageError] = useState(false);
+    
+    return (
+        <div
+            onClick={onPlay}
+            className="group cursor-pointer"
+        >
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-[#1e2139] shadow-lg hover:shadow-xl transition-all duration-300">
+                {!imageError ? (
+                    <img
+                        src={item.image || item.cover}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={() => setImageError(true)}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e2139] to-[#0f1117]">
+                        <Clock size={48} className="text-[#4f9cf9]/30" />
+                    </div>
+                )}
+                {/* Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onPlay();
+                    }}
+                    className="absolute bottom-4 right-4 w-12 h-12 bg-[#4f9cf9] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110 hover:bg-[#3d8ae6]"
+                >
+                    <Play size={20} className="text-white ml-0.5" fill="currentColor" />
+                </button>
+            </div>
+            <h3 className="font-semibold text-base text-white mb-1 truncate group-hover:text-[#4f9cf9] transition-colors">
+                {item.title}
+            </h3>
+            <p className="text-sm text-[#667085]">{songCount} songs, {duration}</p>
+        </div>
+    );
 }

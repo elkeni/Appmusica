@@ -101,27 +101,27 @@ export default function SearchView() {
     };
 
     return (
-        <div className="min-h-screen p-6 md:p-8">
+        <div className="min-h-screen p-6 md:p-8 bg-[#1a1d2e]">
             <div className="max-w-6xl mx-auto">
                 {/* Search Bar */}
                 <div className="mb-8">
                     <div className="relative">
                         <SearchIcon 
                             size={20} 
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" 
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b4b8c5]" 
                         />
                         <input
                             ref={inputRef}
                             type="text"
                             value={query}
                             onChange={handleInputChange}
-                            placeholder="¿Qué quieres escuchar?"
-                            className="w-full h-14 pl-12 pr-12 bg-white/10 backdrop-blur-xl rounded-full border-2 border-white/10 focus:border-green-500 focus:outline-none text-white placeholder-gray-400 transition-all"
+                            placeholder="Search tracks, albums, artists..."
+                            className="w-full h-14 pl-12 pr-12 bg-[#1e2139]/60 backdrop-blur-xl rounded-full border-2 border-transparent focus:border-[#4f9cf9] focus:outline-none text-white placeholder-[#b4b8c5] transition-all"
                         />
                         {query && (
                             <button
                                 onClick={clearSearch}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#b4b8c5] hover:text-white transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -138,8 +138,8 @@ export default function SearchView() {
                 {hasSearched && !loading && (
                     <FadeInContainer delay={0.1}>
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold mb-4">
-                            {results.length > 0 ? `${results.length} resultados` : 'Sin resultados'}
+                        <h2 className="text-2xl font-bold mb-4 text-white">
+                            {results.length > 0 ? `${results.length} results` : 'No results'}
                         </h2>
                         <StaggerContainer staggerDelay={0.05}>
                         <div className="grid grid-cols-1 gap-2">
@@ -166,15 +166,15 @@ export default function SearchView() {
                     <SlideInContainer direction="up" delay={0.2}>
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Clock size={20} className="text-green-500" />
-                                Búsquedas recientes
+                            <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                                <Clock size={20} className="text-[#4f9cf9]" />
+                                Recent Searches
                             </h2>
                             <button
                                 onClick={clearRecentSearches}
-                                className="text-sm text-gray-400 hover:text-white transition-colors"
+                                className="text-sm text-[#b4b8c5] hover:text-white transition-colors"
                             >
-                                Limpiar
+                                Clear
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -185,7 +185,7 @@ export default function SearchView() {
                                         setQuery(search);
                                         handleSearch(search);
                                     }}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-sm transition-colors"
+                                    className="px-4 py-2 bg-[#1e2139] hover:bg-[#4f9cf9]/10 rounded-full text-sm transition-colors text-[#b4b8c5] hover:text-white"
                                 >
                                     {search}
                                 </button>
@@ -199,9 +199,9 @@ export default function SearchView() {
                 {!hasSearched && trendingSearches.length > 0 && (
                     <FadeInContainer delay={0.3}>
                     <div>
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <TrendingUp size={20} className="text-green-500" />
-                            Tendencias
+                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                            <TrendingUp size={20} className="text-[#4f9cf9]" />
+                            Trending
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {trendingSearches.map((track) => (
@@ -227,7 +227,7 @@ export default function SearchView() {
 
 function SearchResultItem({ track, onPlay, onArtistClick }) {
     return (
-        <div className="group flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
+        <div className="group flex items-center gap-4 p-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors cursor-pointer">
             <button
                 onClick={onPlay}
                 className="relative flex-shrink-0"
@@ -235,7 +235,7 @@ function SearchResultItem({ track, onPlay, onArtistClick }) {
                 <img
                     src={track.image || track.cover}
                     alt={track.title}
-                    className="w-14 h-14 rounded object-cover"
+                    className="w-14 h-14 rounded object-cover bg-[#1e2139]"
                     onError={(e) => e.target.style.display = 'none'}
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
@@ -243,15 +243,15 @@ function SearchResultItem({ track, onPlay, onArtistClick }) {
                 </div>
             </button>
             <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate">{track.title}</p>
+                <p className="font-semibold truncate text-white group-hover:text-[#4f9cf9] transition-colors">{track.title}</p>
                 <button
                     onClick={onArtistClick}
-                    className="text-sm text-gray-400 hover:text-white hover:underline transition-colors truncate block"
+                    className="text-sm text-[#b4b8c5] hover:text-white hover:underline transition-colors truncate block"
                 >
                     {track.artist}
                 </button>
             </div>
-            <div className="text-sm text-gray-400 tabular-nums">
+            <div className="text-sm text-[#b4b8c5] tabular-nums">
                 {formatDuration(track.duration)}
             </div>
         </div>
@@ -261,7 +261,7 @@ function SearchResultItem({ track, onPlay, onArtistClick }) {
 function TrendingCard({ track, onPlay, onClick }) {
     return (
         <div className="group cursor-pointer" onClick={onClick}>
-            <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-gray-800 shadow-md">
+            <div className="relative aspect-square rounded-lg overflow-hidden mb-3 bg-[#1e2139] shadow-md">
                 <img
                     src={track.image || track.cover}
                     alt={track.title}
@@ -273,15 +273,15 @@ function TrendingCard({ track, onPlay, onClick }) {
                         e.stopPropagation();
                         onPlay();
                     }}
-                    className="absolute bottom-2 right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110"
+                    className="absolute bottom-2 right-2 w-10 h-10 bg-[#4f9cf9] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl hover:scale-110 hover:bg-[#3d8ae6]"
                 >
-                    <Play size={16} className="text-black ml-0.5" fill="currentColor" />
+                    <Play size={16} className="text-white ml-0.5" fill="currentColor" />
                 </button>
             </div>
-            <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-green-500 transition-colors">
+            <h3 className="font-semibold text-sm mb-1 truncate group-hover:text-[#4f9cf9] transition-colors text-white">
                 {track.title}
             </h3>
-            <p className="text-xs text-gray-400 truncate">{track.artist}</p>
+            <p className="text-xs text-[#b4b8c5] truncate">{track.artist}</p>
         </div>
     );
 }

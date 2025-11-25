@@ -7,53 +7,56 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Premium Dark Mode Color System
+        // Echo Music Design System
+        echo: {
+          bg: {
+            primary: '#1a1d2e',
+            secondary: '#0f1117',
+            sidebar: 'rgba(13, 15, 26, 0.95)',
+            card: '#1e2139',
+          },
+          accent: {
+            DEFAULT: '#4f9cf9',
+            primary: '#4f9cf9',
+            secondary: '#667085',
+            hover: 'rgba(79, 156, 249, 0.1)',
+          },
+          text: {
+            primary: '#ffffff',
+            secondary: '#b4b8c5',
+          },
+          border: {
+            subtle: 'rgba(255, 255, 255, 0.05)',
+          }
+        },
+        // Keep some legacy colors for compatibility
         green: {
-          400: '#22c55e',
-          500: '#1DB954', // Spotify Green
-          600: '#1aa34a',
+          400: '#4f9cf9',
+          500: '#4f9cf9',
+          600: '#3d8ae6',
         },
-        // Re-map 'pink' to a more vivid, unified primary palette
-        pink: {
-          50: '#fff0f6',
-          100: '#ffd6e8',
-          200: '#ffadd0',
-          300: '#ff85b7',
-          400: '#ff4d98',
-          500: '#ff2d8f',
-          600: '#e61f79',
-          700: '#b5175f',
-          800: '#871245',
-          900: '#5a0b2b'
-        },
-        // Accent cyan for highlights
-        cyan: {
-          50: '#f0feff',
-          100: '#cffafe',
-          200: '#99f6ff',
-          300: '#67e8f9',
-          400: '#22d3ee',
-          500: '#06b6d4',
-          600: '#0891b2',
-          700: '#075985',
-          800: '#05364f',
-          900: '#02202b'
-        },
-        // Provide friendly named tokens used in CSS variables
         primary: {
-          DEFAULT: '#1DB954',
-          600: '#1aa34a'
+          DEFAULT: '#4f9cf9',
+          600: '#3d8ae6'
         },
         accent: {
-          DEFAULT: '#06b6d4',
-          600: '#0891b2'
+          DEFAULT: '#4f9cf9',
+          600: '#3d8ae6'
         },
         panel: {
-          DEFAULT: '#121212'
+          DEFAULT: '#0f1117'
         }
+      },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       backdropBlur: {
         xs: '2px',
+      },
+      spacing: {
+        'sidebar': '240px',
+        'player': '90px',
+        'header': '80px',
       }
     },
   },

@@ -9,7 +9,7 @@ import LyricsView from '../lyrics/LyricsView';
 
 export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavorite, togglePlaylist, playlist }) {
     const { currentTrack, isPlaying, togglePlayPause, nextTrack, prevTrack, currentTime, duration, queue } = usePlayer();
-    const [colors, setColors] = useState({ primary: '#1a1a1a', secondary: '#000000' });
+    const [colors, setColors] = useState({ primary: '#1a1d2e', secondary: '#0f1117' });
     const [activeView, setActiveView] = useState('artwork'); // 'artwork', 'lyrics', 'queue'
     const [showMenu, setShowMenu] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -123,7 +123,7 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
     if (!currentTrack) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex bg-black text-white overflow-hidden">
+        <div className="fixed inset-0 z-50 flex bg-[#1a1d2e] text-white overflow-hidden">
             {/* Dynamic Background - Animated Gradient Mesh */}
             <div
                 className="absolute inset-0 transition-colors duration-1000 ease-in-out"
@@ -132,11 +132,11 @@ export default function MobileFullScreenPlayer({ onClose, favorites, toggleFavor
                         radial-gradient(circle at 20% 50%, ${colors.primary}40 0%, transparent 50%),
                         radial-gradient(circle at 80% 50%, ${colors.secondary}40 0%, transparent 50%),
                         radial-gradient(circle at 50% 80%, ${colors.primary}20 0%, transparent 70%),
-                        linear-gradient(180deg, #000000 0%, #0a0a0a 100%)
+                        linear-gradient(180deg, #1a1d2e 0%, #0f1117 100%)
                     `
                 }}
             />
-            <div className="absolute inset-0 backdrop-blur-[80px] bg-black/40" />
+            <div className="absolute inset-0 backdrop-blur-[80px] bg-[#1a1d2e]/40" />
 
             {/* MOBILE LAYOUT (< md) */}
             <div 

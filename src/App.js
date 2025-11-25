@@ -36,10 +36,10 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#1a1d2e] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-white text-lg font-medium">Cargando CloudTune...</p>
+          <div className="w-16 h-16 border-4 border-[#4f9cf9] border-t-transparent rounded-full animate-spin" />
+          <p className="text-white text-lg font-medium">Loading Echo Music...</p>
         </div>
       </div>
     );
@@ -53,7 +53,7 @@ function AppContent() {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-black"><LoadingSpinner size="xl" /></div>}>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#1a1d2e]"><LoadingSpinner size="xl" /></div>}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
