@@ -161,89 +161,133 @@ class CacheService {
                     }
                 } catch (error) {
                     // Si hay error al parsear, eliminar entrada corrupta
+                    keysToRemove.push(key);
+                }
+            }
 
-                    /**
-                     * Limpiar todo el caché del namespace
-                     */
-                    clearNamespace(namespace) {
-                        try {
-                            const keysToRemove = [];
-                            const prefix = `${CACHE_PREFIX}${namespace}_`;
+            // Eliminar todas las entradas marcadas
+            keysToRemove.forEach(key => this.storage.removeItem(key));
 
-                            for (let i = 0; i < this.storage.length; i++) {
-                                const key = this.storage.key(i);
-                                /**
-                                 * Limpiar todo el caché
-                                 */
-                                clearAll() {
-                                    try {
-                                        const keysToRemove = [];
+            console.log(`🧹 Cleaned ${keysToRemove.length} expired entries`);
+        } catch (error) {
+            console.error('Error cleaning old entries:', error);
+        }
+    }
 
-                                        for (let i = 0; i < this.storage.length; i++) {
-                                            const key = this.storage.key(i);
-                                            /**
-                                             * Obtener estadísticas del caché
-                                             */
-                                            getStats() {
-                                                let totalEntries = 0;
-                                                let expiredEntries = 0;
-                                                const now = Date.now();
+    /**
+     * Limpiar todo el caché del namespace
+     */
+    clearNamespace(namespace) {
+        try {
+            const keysToRemove = [];
+            const prefix = `${CACHE_PREFIX}${namespace}_`;
 
-                                                for (let i = 0; i < this.storage.length; i++) {
-                                                    const key = this.storage.key(i);
+            for (let i = 0; i < this.storage.length; i++) {
+                const key = this.storage.key(i);
 
-                                                    if (!key || !key.startsWith(CACHE_PREFIX)) {
-                                                        continue;
-                                                    }
+                if (key && key.startsWith(prefix)) {
+                    keysToRemove.push(key);
+                }
+            }
 
-                                                    totalEntries++;
+            keysToRemove.forEach(key => this.storage.removeItem(key));
+            console.log(`🧹 Cleared ${keysToRemove.length} entries from namespace: ${namespace}`);
 
-                                                    try {
-                                                        const cached = this.storage.getItem(key);
-                                                        const cacheEntry = JSON.parse(cached);
+            return true;
+        } catch (error) {
+            console.error('Error clearing namespace:', error);
+            return false;
+        }
+    }
 
-                                                        if (now > cacheEntry.expires) {
-                                                            expiredEntries++;
-                                                        }
-                                                    } catch (error) {
-                                                        expiredEntries++;
-                                                    }
-                                                }
+    /**
+     * Limpiar todo el caché
+     */
+    clearAll() {
+        try {
+            const keysToRemove = [];
 
-                                                return {
-                                                    totalEntries,
-                                                    expiredEntries,
-                                                    activeEntries: totalEntries - expiredEntries,
-                                                    totalSize: this.getCacheSize(),
-                                                    maxSize: MAX_CACHE_SIZE,
-                                                    usagePercentage: ((this.getCacheSize() / MAX_CACHE_SIZE) * 100).toFixed(2),
-                                                };
-                                            }
-                                        }
+            for (let i = 0; i < this.storage.length; i++) {
+                const key = this.storage.key(i);
 
-                                        // Exportar instancia única (Singleton)
-                                        const cacheService = new CacheService();
+                if (key && key.startsWith(CACHE_PREFIX)) {
+                    keysToRemove.push(key);
+                }
+            }
 
-                                        // Limpiar caché expirado al iniciar
-                                        cacheService.cleanOldEntries();
+            keysToRemove.forEach(key => this.storage.removeItem(key));
+            console.log(`🧹 Cleared all cache (${keysToRemove.length} entries)`);
 
-                                        export default cacheService;
+            return true;
+        } catch (error) {
+            console.error('Error clearing all cache:', error);
+            return false;
+        }
+    }
 
-                                        // Namespaces predefinidos
-                                        export const CACHE_NAMESPACES = {
-                                            SEARCH: 'search',
-                                            TRACK: 'track',
-                                            ARTIST: 'artist',
-                                            ALBUM: 'album',
-                                            PLAYLIST: 'playlist',
-                                            TRENDING: 'trending',
-                                            YOUTUBE: 'youtube',
-                                        };
+    /**
+     * Obtener estadísticas del caché
+     */
+    getStats() {
+        let totalEntries = 0;
+        let expiredEntries = 0;
+        const now = Date.now();
 
-                                        // TTLs personalizados
-                                        export const CACHE_TTL = {
-                                            SHORT: 1000 * 60 * 5,      // 5 minutos
-                                            MEDIUM: 1000 * 60 * 30,    // 30 minutos (default)
-                                            LONG: 1000 * 60 * 60 * 2,  // 2 horas
-                                            DAY: 1000 * 60 * 60 * 24,  // 24 horas
-                                        };
+        for (let i = 0; i < this.storage.length; i++) {
+            const key = this.storage.key(i);
+
+            if (!key || !key.startsWith(CACHE_PREFIX)) {
+                continue;
+            }
+
+            totalEntries++;
+
+            try {
+                const cached = this.storage.getItem(key);
+                const cacheEntry = JSON.parse(cached);
+
+                if (now > cacheEntry.expires) {
+                    expiredEntries++;
+                }
+            } catch (error) {
+                expiredEntries++;
+            }
+        }
+
+        return {
+            totalEntries,
+            expiredEntries,
+            activeEntries: totalEntries - expiredEntries,
+            totalSize: this.getCacheSize(),
+            maxSize: MAX_CACHE_SIZE,
+            usagePercentage: ((this.getCacheSize() / MAX_CACHE_SIZE) * 100).toFixed(2),
+        };
+    }
+}
+
+// Exportar instancia única (Singleton)
+const cacheService = new CacheService();
+
+// Limpiar caché expirado al iniciar
+cacheService.cleanOldEntries();
+
+export default cacheService;
+
+// Namespaces predefinidos
+export const CACHE_NAMESPACES = {
+    SEARCH: 'search',
+    TRACK: 'track',
+    ARTIST: 'artist',
+    ALBUM: 'album',
+    PLAYLIST: 'playlist',
+    TRENDING: 'trending',
+    YOUTUBE: 'youtube',
+};
+
+// TTLs personalizados
+export const CACHE_TTL = {
+    SHORT: 1000 * 60 * 5,      // 5 minutos
+    MEDIUM: 1000 * 60 * 30,    // 30 minutos (default)
+    LONG: 1000 * 60 * 60 * 2,  // 2 horas
+    DAY: 1000 * 60 * 60 * 24,  // 24 horas
+};

@@ -250,7 +250,7 @@ export const generateAnimationVariants = (basePreset = 'slideUp', count = 5) => 
   return variants;
 };
 
-export default {
+const splitTextUtils = {
   SPLIT_TEXT_PRESETS,
   EASING_FUNCTIONS,
   SPLIT_TYPES,
@@ -259,3 +259,5 @@ export default {
   createCustomAnimation,
   generateAnimationVariants,
 };
+
+export default splitTextUtils;

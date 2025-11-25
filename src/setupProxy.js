@@ -7,13 +7,14 @@
  * 2. WebSocket para hot reload de React
  */
 
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
   // Solo configurar proxies si se necesitan para APIs específicas
   // El WebSocket de React ya funciona automáticamente
   
   // Ejemplo: Si necesitas proxy para una API específica
+  // const { createProxyMiddleware } = require('http-proxy-middleware');
   // app.use(
   //   '/api',
   //   createProxyMiddleware({

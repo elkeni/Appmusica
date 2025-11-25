@@ -1,43 +1,34 @@
 /**
- * YouTube Music Components & Utils Index
+ * Components Index
  * 
- * Archivo centralizado para facilitar importaciones
- * Usa: import { SplitText, Header, SPLIT_TEXT_PRESETS } from './components/index';
+ * Central export file for components
  */
 
-// ========================================
-// COMPONENTES
-// ========================================
+// Layout Components
+export { default as Sidebar } from './layout/Sidebar';
+export { default as Header } from './layout/Header';
+export { default as BottomNav } from './layout/BottomNav';
+export { default as RightPanel } from './layout/RightPanel';
 
-// Componente Principal - Animaciones de Texto
-export { default as SplitText } from './SplitText';
+// Player Components
+export { default as PlayerBar } from './player/PlayerBar';
+export { default as NowPlayingModal } from './player/NowPlayingModal';
+export { default as MobileFullScreenPlayer } from './player/MobileFullScreenPlayer';
 
-// Componentes de Layout
-export { default as Header } from './Header';
-export { default as HeroSection } from './HeroSection';
-export { default as TrackGrid } from './TrackGrid';
+// Shared Components
+export { default as Auth } from './shared/Auth';
+export { default as ErrorBoundary } from './shared/ErrorBoundary';
+export { default as LoadingSpinner } from './shared/LoadingSpinner';
+export { default as LazyImage } from './shared/LazyImage';
+export { default as PageTransition } from './shared/PageTransition';
+export { default as SongCard } from './shared/SongCard';
+export { default as SongListItem } from './shared/SongListItem';
+export { default as SongMenu } from './shared/SongMenu';
+export { default as FilterChips } from './shared/FilterChips';
+export { default as SearchFilterTabs } from './shared/SearchFilterTabs';
+export { default as AddToPlaylistModal } from './shared/AddToPlaylistModal';
+export { default as BrowseView } from './shared/BrowseView';
+export { default as SplitText } from './shared/SplitText';
 
-// Componentes Demo
-export { default as DemoYTM } from './DemoYTM';
-export { default as SplitTextExamples } from './SplitTextExamples';
-export { default as SplitTextShowcase } from './SplitTextShowcase';
-
-// ========================================
-// ESTILOS (CSS IMPORTS - Incluir en App.js)
-// ========================================
-// import './Header.css';
-// import './HeroSection.css';
-// import './TrackGrid.css';
-// import './DemoYTM.css';
-// import './SplitTextExamples.css';
-// import './SplitTextShowcase.css';
-
-export default {
-  SplitText,
-  Header,
-  HeroSection,
-  TrackGrid,
-  DemoYTM,
-  SplitTextExamples,
-  SplitTextShowcase,
-};
+// Lyrics Components
+export { default as LyricsView } from './lyrics/LyricsView';
