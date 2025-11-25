@@ -20,7 +20,7 @@ export default function MainLayout() {
     return (
         <div className="h-screen overflow-hidden bg-[#1a1d2e] text-white flex flex-col md:flex-row">
             {/* SIDEBAR - Desktop Only */}
-            <aside className="hidden md:flex md:w-60 flex-shrink-0 flex-col h-screen bg-[#0d0f1a]/95 border-r border-white/5">
+            <aside className="hidden md:flex md:w-[240px] flex-shrink-0 flex-col h-screen bg-[#0d0f1a]/95 border-r border-white/5">
                 <Sidebar />
             </aside>
 
@@ -32,7 +32,7 @@ export default function MainLayout() {
                 </div>
 
                 {/* PLAYER BAR - Desktop (Docked) */}
-                <div className="hidden md:block fixed bottom-0 left-0 md:left-60 right-0 z-50">
+                <div className="hidden md:block fixed bottom-0 left-0 md:left-[240px] right-0 z-50">
                     <PlayerBar onOpenMobile={() => setShowMobilePlayer(true)} />
                 </div>
             </main>

@@ -28,36 +28,36 @@ export default function Profile() {
     };
 
     const stats = [
-        { icon: Heart, label: 'Favoritos', value: favorites?.length || 0, color: 'text-red-500' },
-        { icon: Music, label: 'Playlists', value: playlists?.length || 0, color: 'text-green-500' },
-        { icon: Calendar, label: 'Días activo', value: calculateDaysActive(user?.metadata?.creationTime), color: 'text-blue-500' },
+        { icon: Heart, label: 'Favorites', value: favorites?.length || 0, color: 'text-[#4f9cf9]' },
+        { icon: Music, label: 'Playlists', value: playlists?.length || 0, color: 'text-[#4f9cf9]' },
+        { icon: Calendar, label: 'Days active', value: calculateDaysActive(user?.metadata?.creationTime), color: 'text-[#4f9cf9]' },
     ];
 
     return (
-        <div className="min-h-screen p-6 md:p-12">
+        <div className="min-h-screen p-6 md:p-12 bg-[#1a1d2e]">
             {/* Header */}
             <div className="max-w-4xl mx-auto">
                 <button
                     onClick={() => navigate(-1)}
-                    className="mb-6 text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                    className="mb-6 text-[#b4b8c5] hover:text-white transition-colors flex items-center gap-2"
                 >
                     <X size={20} />
-                    <span>Volver</span>
+                    <span>Back</span>
                 </button>
 
                 {/* Profile Card */}
                 <FadeInContainer delay={0.1}>
-                    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl mb-8">
+                    <div className="bg-[#1e2139] backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl mb-8">
                         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                             {/* Profile Picture */}
                             <div className="relative">
                                 <img
-                                    src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}&size=160&background=1DB954&color=fff&bold=true`}
+                                    src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.email || 'User')}&size=160&background=4f9cf9&color=fff&bold=true`}
                                     alt="Profile"
-                                    className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-green-500/30 shadow-xl"
+                                    className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-[#4f9cf9]/30 shadow-xl"
                                 />
-                                <button className="absolute bottom-2 right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors shadow-lg">
-                                    <Edit2 size={16} className="text-black" />
+                                <button className="absolute bottom-2 right-2 w-10 h-10 bg-[#4f9cf9] rounded-full flex items-center justify-center hover:bg-[#3d8ae6] transition-colors shadow-lg">
+                                    <Edit2 size={16} className="text-white" />
                                 </button>
                             </div>
 
@@ -69,12 +69,12 @@ export default function Profile() {
                                             type="text"
                                             value={displayName}
                                             onChange={(e) => setDisplayName(e.target.value)}
-                                            className="text-3xl md:text-4xl font-bold bg-white/10 rounded-lg px-4 py-2 border border-white/20 focus:border-green-500 focus:outline-none"
-                                            placeholder="Tu nombre"
+                                            className="text-3xl md:text-4xl font-bold bg-[#0f1117] rounded-lg px-4 py-2 border border-white/10 focus:border-[#4f9cf9] focus:outline-none text-white"
+                                            placeholder="Your name"
                                         />
                                     ) : (
-                                        <h1 className="text-3xl md:text-4xl font-bold">
-                                            {user?.displayName || user?.email?.split('@')[0] || 'Usuario'}
+                                        <h1 className="text-3xl md:text-4xl font-bold text-white">
+                                            {user?.displayName || user?.email?.split('@')[0] || 'User'}
                                         </h1>
                                     )}
                                     {!isEditing ? (
@@ -82,15 +82,15 @@ export default function Profile() {
                                             onClick={() => setIsEditing(true)}
                                             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
                                         >
-                                            <Edit2 size={14} />
+                                            <Edit2 size={14} className="text-white" />
                                         </button>
                                     ) : (
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={handleSave}
-                                                className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center hover:bg-green-600 transition-colors"
+                                                className="w-8 h-8 rounded-full bg-[#4f9cf9] flex items-center justify-center hover:bg-[#3d8ae6] transition-colors"
                                             >
-                                                <Save size={14} className="text-black" />
+                                                <Save size={14} className="text-white" />
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -99,20 +99,20 @@ export default function Profile() {
                                                 }}
                                                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
                                             >
-                                                <X size={14} />
+                                                <X size={14} className="text-white" />
                                             </button>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex flex-col gap-2 text-gray-400">
+                                <div className="flex flex-col gap-2 text-[#b4b8c5]">
                                     <div className="flex items-center justify-center md:justify-start gap-2">
                                         <Mail size={16} />
                                         <span className="text-sm">{user?.email}</span>
                                     </div>
                                     <div className="flex items-center justify-center md:justify-start gap-2">
                                         <User size={16} />
-                                        <span className="text-sm">Miembro desde {formatDate(user?.metadata?.creationTime)}</span>
+                                        <span className="text-sm">Member since {formatDate(user?.metadata?.creationTime)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -126,15 +126,15 @@ export default function Profile() {
                         {stats.map((stat, index) => (
                             <div
                                 key={index}
-                                className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
+                                className="bg-[#1e2139] backdrop-blur-xl rounded-2xl p-6 border border-white/5 hover:bg-[#1e2139]/80 transition-colors"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center ${stat.color}`}>
+                                    <div className={`w-12 h-12 rounded-xl bg-[#4f9cf9]/10 flex items-center justify-center ${stat.color}`}>
                                         <stat.icon size={24} />
                                     </div>
                                     <div>
-                                        <p className="text-3xl font-bold">{stat.value}</p>
-                                        <p className="text-sm text-gray-400">{stat.label}</p>
+                                        <p className="text-3xl font-bold text-white">{stat.value}</p>
+                                        <p className="text-sm text-[#b4b8c5]">{stat.label}</p>
                                     </div>
                                 </div>
                             </div>
@@ -144,33 +144,33 @@ export default function Profile() {
 
                 {/* Recent Activity */}
                 <SlideInContainer direction="up" delay={0.4}>
-                    <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 mb-8">
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <Music size={20} className="text-green-500" />
-                            Actividad Reciente
+                    <div className="bg-[#1e2139] backdrop-blur-xl rounded-2xl p-6 border border-white/5 mb-8">
+                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                            <Music size={20} className="text-[#4f9cf9]" />
+                            Recent Activity
                         </h2>
                         <div className="space-y-3">
                             {favorites?.slice(0, 5).map((track, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors cursor-pointer"
                                 >
                                     <img
                                         src={track.image || track.cover}
                                         alt={track.title}
-                                        className="w-12 h-12 rounded object-cover"
+                                        className="w-12 h-12 rounded object-cover bg-[#0f1117]"
                                         onError={(e) => e.target.style.display = 'none'}
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold truncate">{track.title}</p>
-                                        <p className="text-sm text-gray-400 truncate">{track.artist}</p>
+                                        <p className="font-semibold truncate text-white">{track.title}</p>
+                                        <p className="text-sm text-[#b4b8c5] truncate">{track.artist}</p>
                                     </div>
-                                    <Heart size={16} className="text-red-500" fill="currentColor" />
+                                    <Heart size={16} className="text-[#4f9cf9]" fill="currentColor" />
                                 </div>
                             ))}
                             {(!favorites || favorites.length === 0) && (
-                                <p className="text-center text-gray-400 py-8">
-                                    Aún no tienes favoritos. ¡Empieza a explorar música!
+                                <p className="text-center text-[#b4b8c5] py-8">
+                                    No favorites yet. Start exploring music!
                                 </p>
                             )}
                         </div>
@@ -179,26 +179,26 @@ export default function Profile() {
 
                 {/* Settings */}
                 <FadeInContainer delay={0.5}>
-                    <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-                        <h2 className="text-xl font-bold mb-4">Configuración</h2>
+                    <div className="bg-[#1e2139] backdrop-blur-xl rounded-2xl p-6 border border-white/5">
+                        <h2 className="text-xl font-bold mb-4 text-white">Settings</h2>
                         <div className="space-y-3">
-                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-colors flex items-center justify-between">
-                                <span>Preferencias de reproducción</span>
-                                <span className="text-gray-400 text-sm">→</span>
+                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors flex items-center justify-between text-white">
+                                <span>Playback Preferences</span>
+                                <span className="text-[#b4b8c5] text-sm">→</span>
                             </button>
-                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-colors flex items-center justify-between">
-                                <span>Notificaciones</span>
-                                <span className="text-gray-400 text-sm">→</span>
+                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors flex items-center justify-between text-white">
+                                <span>Notifications</span>
+                                <span className="text-[#b4b8c5] text-sm">→</span>
                             </button>
-                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 transition-colors flex items-center justify-between">
-                                <span>Privacidad</span>
-                                <span className="text-gray-400 text-sm">→</span>
+                            <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-[#4f9cf9]/5 transition-colors flex items-center justify-between text-white">
+                                <span>Privacy</span>
+                                <span className="text-[#b4b8c5] text-sm">→</span>
                             </button>
                             <button
                                 onClick={handleLogout}
                                 className="w-full text-left px-4 py-3 rounded-lg hover:bg-red-500/10 text-red-400 transition-colors"
                             >
-                                Cerrar sesión
+                                Sign out
                             </button>
                         </div>
                     </div>
@@ -209,9 +209,9 @@ export default function Profile() {
 }
 
 function formatDate(timestamp) {
-    if (!timestamp) return 'Recientemente';
+    if (!timestamp) return 'Recently';
     const date = new Date(timestamp);
-    return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
 function calculateDaysActive(creationTime) {
