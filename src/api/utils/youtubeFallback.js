@@ -28,13 +28,11 @@ const getNextInvidiousInstance = () => {
  */
 export const searchViaInvidious = async (query, maxResults = 1) => {
     const instance = getNextInvidiousInstance();
-    
+
     try {
-        console.log(`🔄 [Fallback] Trying Invidious: ${instance}`);
-        
         const response = await fetch(
             `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video`,
-            { 
+            {
                 timeout: 8000,
                 signal: AbortSignal.timeout(8000)
             }
@@ -45,7 +43,7 @@ export const searchViaInvidious = async (query, maxResults = 1) => {
         }
 
         const data = await response.json();
-        
+
         if (data && data.length > 0) {
             const videos = data
                 .filter(item => item.type === 'video')
@@ -59,7 +57,6 @@ export const searchViaInvidious = async (query, maxResults = 1) => {
                 }));
 
             if (videos.length > 0) {
-                console.log(`✅ [Fallback] Invidious found: ${videos[0].videoId}`);
                 return videos[0];
             }
         }
@@ -90,13 +87,11 @@ const getNextPipedInstance = () => {
 
 export const searchViaPiped = async (query, maxResults = 1) => {
     const instance = getNextPipedInstance();
-    
+
     try {
-        console.log(`🔄 [Fallback] Trying Piped: ${instance}`);
-        
         const response = await fetch(
             `${instance}/search?q=${encodeURIComponent(query)}&filter=music_songs`,
-            { 
+            {
                 timeout: 8000,
                 signal: AbortSignal.timeout(8000)
             }
@@ -107,13 +102,12 @@ export const searchViaPiped = async (query, maxResults = 1) => {
         }
 
         const data = await response.json();
-        
+
         if (data && data.items && data.items.length > 0) {
             const video = data.items[0];
             const videoId = video.url?.replace('/watch?v=', '') || video.id;
 
             if (videoId) {
-                console.log(`✅ [Fallback] Piped found: ${videoId}`);
                 return {
                     videoId,
                     title: video.title,
@@ -137,11 +131,8 @@ export const searchViaPiped = async (query, maxResults = 1) => {
  */
 export const searchViaYouTubeDirectly = async (query) => {
     try {
-        console.log(`🔄 [Fallback] Trying direct YouTube search...`);
-        
         // This would require a CORS proxy or backend service
         // For now, we'll skip this method as it requires server-side implementation
-        console.warn('⚠️ [Fallback] Direct YouTube scraping requires CORS proxy (skipped)');
         return null;
     } catch (error) {
         console.warn(`⚠️ [Fallback] Direct search failed:`, error.message);
@@ -154,8 +145,6 @@ export const searchViaYouTubeDirectly = async (query) => {
  * Tries multiple methods in order until one succeeds
  */
 export const findVideoIdWithFallback = async (query) => {
-    console.log(`🔍 [Fallback] Starting fallback search for: "${query}"`);
-    
     // Try Invidious first (most reliable)
     let result = await searchViaInvidious(query);
     if (result?.videoId) {
@@ -187,16 +176,16 @@ export const isQuotaExceeded = () => {
         if (exceeded) {
             const timestamp = parseInt(exceeded);
             const hoursSince = (Date.now() - timestamp) / (1000 * 60 * 60);
-            
+
             // Reset after 24 hours (YouTube quota resets at midnight PST)
             if (hoursSince > 24) {
                 localStorage.removeItem('youtube_quota_exceeded');
                 return false;
             }
-            
+
             return true;
         }
-    } catch (error) {}
+    } catch (error) { }
     return false;
 };
 
@@ -205,15 +194,13 @@ export const isQuotaExceeded = () => {
  */
 export const shouldUseFallback = (apiKey) => {
     if (!apiKey) {
-        console.log('🔄 [Fallback] No API key configured, using fallback');
         return true;
     }
-    
+
     if (isQuotaExceeded()) {
-        console.log('🔄 [Fallback] Quota exceeded, using fallback');
         return true;
     }
-    
+
     return false;
 };
 

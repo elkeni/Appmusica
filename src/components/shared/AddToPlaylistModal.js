@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Plus, Music } from 'lucide-react';
 
 
-export default function AddToPlaylistModal({ isOpen, onClose, playlists, onAddToPlaylist }) {
+export default function AddToPlaylistModal({ isOpen, onClose, playlists = [], onAddToPlaylist }) {
     const [searchTerm, setSearchTerm] = useState('');
 
     if (!isOpen) return null;

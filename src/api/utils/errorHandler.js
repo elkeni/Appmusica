@@ -120,7 +120,7 @@ export async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
             return await fn();
         } catch (error) {
             lastError = error;
-            
+
             // PHASE 1: NO retry on 4xx errors (client errors are permanent)
             // 403 = Quota exceeded or forbidden - retrying makes it worse
             // 429 = Rate limit - should respect the limit, not retry immediately
@@ -134,7 +134,6 @@ export async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
             // Only retry on 5xx (server errors) or network issues
             if (attempt < maxRetries - 1) {
                 const delay = baseDelay * Math.pow(2, attempt);
-                console.log(`⏳ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
@@ -143,9 +142,11 @@ export async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
     throw lastError;
 }
 
-export default {
+const errorHandler = {
     APIError,
     handleHTTPError,
     logError,
     retryWithBackoff,
 };
+
+export default errorHandler;

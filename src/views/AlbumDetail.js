@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMusic } from '../hooks/useMusic';
 import { usePlayer } from '../context/PlayerContext';
-import SongListItem from '../components/shared/SongListItem';
+import { SongListItem } from '../components/shared';
 import { getItemId } from '../utils/formatUtils';
 
 export default function AlbumDetail({ favorites, toggleFavorite, onAddPlaylist }) {

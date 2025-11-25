@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Music, Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
-import SongListItem from '../components/shared/SongListItem';
+import { SongListItem } from '../components/shared';
 import { getItemId } from '../utils/formatUtils';
 
 export default function UserLibrary({ userPlaylists, setUserPlaylists, saveUserPlaylists, favorites, toggleFavorite, onAddPlaylist }) {

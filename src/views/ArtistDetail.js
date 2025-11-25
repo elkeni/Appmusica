@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import { useMusic } from '../hooks/useMusic';
 import { usePlayer } from '../context/PlayerContext';
-import SongListItem from '../components/shared/SongListItem';
+import { SongListItem } from '../components/shared';
 import { getItemId } from '../utils/formatUtils';
 
 export default function ArtistDetail({ favorites, toggleFavorite, onAddPlaylist }) {
