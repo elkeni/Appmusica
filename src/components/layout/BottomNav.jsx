@@ -21,8 +21,8 @@ export default function BottomNav({ onOpenPlayer }) {
                     onClick={onOpenPlayer}
                     className="backdrop-blur-xl px-4 py-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
                     style={{ 
-                        backgroundColor: '#262d3d',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                        backgroundColor: 'var(--echo-bg-card)',
+                        borderTop: '1px solid var(--echo-border)'
                     }}
                 >
                     <img
@@ -35,11 +35,11 @@ export default function BottomNav({ onOpenPlayer }) {
                         <p className="text-sm font-semibold text-white truncate">
                             {currentTrack.title || 'Unknown Track'}
                         </p>
-                        <p className="text-xs truncate" style={{ color: '#9ca3af' }}>
+                        <p className="text-xs truncate" style={{ color: 'var(--echo-text-secondary)' }}>
                             {currentTrack.artist || 'Unknown Artist'}
                         </p>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`} style={{ backgroundColor: isPlaying ? '#5edb5e' : '#374151' }}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`} style={{ backgroundColor: isPlaying ? 'var(--echo-primary-green)' : '#374151' }}>
                         <div className="w-3 h-3 border-2 border-white rounded-full" />
                     </div>
                 </div>
@@ -47,17 +47,18 @@ export default function BottomNav({ onOpenPlayer }) {
 
             {/* Bottom Navigation */}
             <nav className="backdrop-blur-xl px-2 py-2 flex items-center justify-around pb-safe" style={{ 
-                backgroundColor: '#0f1419',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                backgroundColor: 'var(--echo-bg-sidebar)',
+                borderTop: '1px solid var(--echo-border)'
             }}>
                 {navItems.map((item) => (
                     <NavLink
                         key={item.path}
                         to={item.path}
-                        className="flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all"
-                        style={({ isActive }) => ({
-                            color: isActive ? '#5edb5e' : '#9ca3af'
-                        })}
+                        className={({ isActive }) => 
+                            `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-all ${
+                                isActive ? 'text-[#5edb5e]' : 'text-[#9ca3af]'
+                            }`
+                        }
                     >
                         <item.icon size={24} />
                         <span className="text-xs font-medium">{item.label}</span>

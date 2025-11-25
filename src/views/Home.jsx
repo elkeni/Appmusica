@@ -62,13 +62,11 @@ export default function Home() {
                             <input
                                 type="text"
                                 placeholder="Search for songs, artists, albums..."
-                                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none focus:ring-2 transition-all"
+                                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4a90e2] transition-all"
                                 style={{ 
-                                    backgroundColor: '#262d3d',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                                    backgroundColor: 'var(--echo-bg-card)',
+                                    border: '1px solid var(--echo-border)'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#4a90e2'}
-                                onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
                                 onClick={() => navigate('/search')}
                             />
                         </div>
