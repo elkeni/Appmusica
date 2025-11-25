@@ -25,10 +25,10 @@ export const PlayerProvider = ({ children }) => {
 
     // ReactPlayer reference
     const playerRef = useRef(null);
-    
+
     // Ref for handleNextTrack (needed before definition)
     const handleNextTrackRef = useRef(null);
-    
+
     // ==================== PHASE 1: ENHANCED PROMISE GUARD ====================
     const playPromiseRef = useRef(null);      // Track pending play operations
     const isPausing = useRef(false);          // Track if pause is in progress
@@ -38,13 +38,11 @@ export const PlayerProvider = ({ children }) => {
 
     // SIMPLIFIED: Just set playing state - ReactPlayer handles everything
     const safePlay = useCallback(() => {
-        console.log('▶️ safePlay() - Setting isPlaying to true');
         setIsPlaying(true);
     }, []);
 
     // SIMPLIFIED: Just set playing state to false
     const safePause = useCallback(() => {
-        console.log('⏸️ safePause() - Setting isPlaying to false');
         setIsPlaying(false);
     }, []);
 
@@ -105,7 +103,7 @@ export const PlayerProvider = ({ children }) => {
     // PHASE 2: Load new track when currentTrack changes - WITH DEBOUNCE
     useEffect(() => {
         let cancelled = false;
-        
+
         const loadTrack = async () => {
             if (!currentTrack) {
                 setDuration(0);
@@ -119,13 +117,12 @@ export const PlayerProvider = ({ children }) => {
 
                 // Si no tiene playbackUrl, obtenerlo vía MusicRepository
                 if (!currentTrack.playbackUrl) {
-                    console.log('🎵 Fetching YouTube URL for:', currentTrack.title);
                     setLoading(true);
-                    
+
                     const playableTrack = await MusicRepository.play(currentTrack);
-                    
+
                     if (cancelled) return;
-                    
+
                     // Update track con la URL de YouTube
                     setCurrentTrack(prev => ({
                         ...prev,
@@ -135,21 +132,18 @@ export const PlayerProvider = ({ children }) => {
                     }));
 
                     setLoading(false);
-                    console.log('✅ Ready to play:', playableTrack.playbackUrl);
-                } else {
-                    console.log('✅ Already has playbackUrl:', currentTrack.playbackUrl);
                 }
 
                 if (cancelled) return;
 
                 // Initialize waveform
                 initWaveformFor(currentTrack.id || currentTrack.videoId || currentTrack.title || '');
-                
+
                 // Clear switching flag after a brief delay
                 setTimeout(() => {
                     isSwitchingTrack.current = false;
                 }, 500);
-                
+
             } catch (err) {
                 if (cancelled) return;
                 console.error('❌ Error loading track:', err);
@@ -162,7 +156,7 @@ export const PlayerProvider = ({ children }) => {
         };
 
         loadTrack();
-        
+
         return () => {
             cancelled = true;
             isSwitchingTrack.current = false;
@@ -173,16 +167,15 @@ export const PlayerProvider = ({ children }) => {
     // Poll for duration until we get it (with safety checks)
     useEffect(() => {
         if (!currentTrack?.playbackUrl || duration > 0) return;
-        
+
         let errorCount = 0;
         const maxErrors = 5;
-        
+
         const checkDuration = setInterval(() => {
             if (playerRef.current && typeof playerRef.current.getDuration === 'function') {
                 try {
                     const dur = playerRef.current.getDuration();
                     if (dur && dur > 0) {
-                        console.log('⏱️ Duration obtained:', dur, 'seconds');
                         setDuration(dur);
                     }
                 } catch (error) {
@@ -194,7 +187,7 @@ export const PlayerProvider = ({ children }) => {
                 }
             }
         }, 500);
-        
+
         return () => clearInterval(checkDuration);
     }, [currentTrack?.playbackUrl, duration]);
 
@@ -203,14 +196,11 @@ export const PlayerProvider = ({ children }) => {
     // Pre-cache recommendations when queue is running low
     useEffect(() => {
         const shouldPreload = queue.length <= 2 && queue.length > 0 && currentTrack && playbackContext?.type === 'AUTOPLAY';
-        
+
         if (shouldPreload && !fetchingRecommendations) {
-            console.log('🔄 Pre-loading recommendations (queue running low)...');
-            
             MusicRepository.getRecommendations(currentTrack, 10)
                 .then(similar => {
                     if (similar && similar.length > 0) {
-                        console.log(`✅ Pre-loaded ${similar.length} tracks`);
                         setQueue(prev => [...prev, ...similar]);
                     }
                 })
@@ -221,10 +211,9 @@ export const PlayerProvider = ({ children }) => {
     // PHASE 3: Play item function with enhanced coordination
     const playItem = useCallback(async (item, context = null) => {
         try {
-            console.log('🎵 playItem() called for:', item.title);
             setError(null);
             setLoading(true);
-            
+
             // Stop current playback before switching
             safePause();
             isSwitchingTrack.current = true;
@@ -254,13 +243,12 @@ export const PlayerProvider = ({ children }) => {
             setCurrentTrack(trackData);
             setHistory(prev => [trackData, ...prev.filter(t => t.id !== trackData.id)].slice(0, 20));
             setLoading(false);
-            
+
             // CRITICAL: Wait for loadTrack to complete before playing
             // The loadTrack effect will clear isSwitchingTrack flag
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             // Auto-play the track after loading
-            console.log('✅ Track loaded, starting autoplay');
             safePlay();
 
             // Queue Logic
@@ -270,7 +258,7 @@ export const PlayerProvider = ({ children }) => {
             if (isContextArray || isContextObjectWithItems) {
                 const items = isContextArray ? context : context.items;
                 const targetId = getItemId(item);
-                
+
                 const index = items.findIndex(t => {
                     const tId = getItemId(t);
                     return String(tId) === String(targetId) ||
@@ -292,7 +280,7 @@ export const PlayerProvider = ({ children }) => {
                 setQueue([]);
                 setPlaybackContext({ type: 'AUTOPLAY' });
                 setRadioMode(false);
-                
+
                 // Get recommendations for autoplay
                 MusicRepository.getRecommendations(item, 10).then(similar => {
                     if (similar && similar.length > 0) {
@@ -317,10 +305,9 @@ export const PlayerProvider = ({ children }) => {
             await playItem(nextTrack, 'KEEP');
         } else {
             // INFINITE RADIO MODE
-            console.log('🎵 Queue ended. Activating Infinite Radio Mode...');
             setRadioMode(true);
             setFetchingRecommendations(true);
-            
+
             try {
                 const sourceTrack = currentTrack?.originalData || currentTrack;
                 if (!sourceTrack) {
@@ -332,14 +319,12 @@ export const PlayerProvider = ({ children }) => {
                 }
 
                 let recommendations = [];
-                
+
                 // STRATEGY 1: Get recommendations from MusicRepository
                 try {
-                    console.log('🎯 Strategy 1: Getting recommendations from MusicRepository...');
                     const recs = await MusicRepository.getRecommendations(currentTrack, 15);
-                    
+
                     if (recs && recs.length > 0) {
-                        console.log(`✅ Found ${recs.length} recommendations`);
                         recommendations = recs;
                     }
                 } catch (e) {
@@ -349,11 +334,9 @@ export const PlayerProvider = ({ children }) => {
                 // STRATEGY 2: Fallback to trending
                 if (recommendations.length === 0) {
                     try {
-                        console.log('🎯 Strategy 2: Using trending as fallback...');
                         const trending = await MusicRepository.getTrending(15);
-                        
+
                         if (trending && trending.length > 0) {
-                            console.log(`✅ Loaded ${trending.length} trending tracks`);
                             recommendations = trending;
                         }
                     } catch (e) {
@@ -365,15 +348,13 @@ export const PlayerProvider = ({ children }) => {
                 if (recommendations.length > 0) {
                     const recentIds = history.slice(0, 5).map(t => t.id);
                     const filtered = recommendations.filter(r => !recentIds.includes(r.id));
-                    
+
                     const tracksToUse = filtered.length > 0 ? filtered : recommendations;
                     const next = tracksToUse[0];
-                    
+
                     setQueue(tracksToUse.slice(1));
                     setPlaybackContext({ type: 'AUTOPLAY', source: 'radio' });
                     setFetchingRecommendations(false);
-                    
-                    console.log(`🎵 Playing: ${next.title} by ${next.artist}`);
                     await playItem(next, 'KEEP');
                 } else {
                     console.error('❌ All recommendation strategies failed');
@@ -390,7 +371,7 @@ export const PlayerProvider = ({ children }) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [queue, currentTrack, history, playItem]);
-    
+
     // Update ref after definition
     handleNextTrackRef.current = handleNextTrack;
 
@@ -402,7 +383,7 @@ export const PlayerProvider = ({ children }) => {
             }
             return;
         }
-        
+
         if (history.length > 1) {
             if (playerRef.current) {
                 playerRef.current.seekTo(0, 'seconds');
@@ -418,14 +399,14 @@ export const PlayerProvider = ({ children }) => {
                 if (typeof playerRef.current.getInternalPlayer !== 'function') {
                     return;
                 }
-                
+
                 const internalPlayer = playerRef.current.getInternalPlayer();
-                
+
                 // Verify internal player is ready and has methods
                 if (internalPlayer && typeof internalPlayer.setVolume === 'function') {
                     const volumePercent = Math.round(volume * 100);
                     internalPlayer.setVolume(volumePercent);
-                    
+
                     // Asegurar que no esté muted
                     if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
                         internalPlayer.unMute();
@@ -469,7 +450,6 @@ export const PlayerProvider = ({ children }) => {
     const togglePlayPause = async () => {
         // CRITICAL: Ignore if track is switching or loading
         if (isSwitchingTrack.current || loading) {
-            console.log('⏭️ Track loading or switching, ignoring toggle');
             return;
         }
 
@@ -480,24 +460,21 @@ export const PlayerProvider = ({ children }) => {
 
         // If no playbackUrl yet, canción está cargando
         if (!currentTrack.playbackUrl) {
-            console.log('⏳ Track still loading, ignoring toggle');
             return;
         }
 
         // Wait for player to be ready (with forgiving timeout)
         if (!isPlayerReady.current) {
-            console.log('⏳ Player not ready, waiting...');
             const startTime = Date.now();
             while (!isPlayerReady.current && Date.now() - startTime < 500) {
                 await new Promise(resolve => setTimeout(resolve, 50));
             }
-            
+
             // If still not ready but we have a playerRef, assume it's ready
             if (!isPlayerReady.current && playerRef.current) {
-                console.log('⚡ Assuming player ready (playerRef exists)');
                 isPlayerReady.current = true;
             }
-            
+
             if (!isPlayerReady.current) {
                 console.warn('⚠️ Player not ready after 500ms, aborting toggle');
                 return;
@@ -519,10 +496,8 @@ export const PlayerProvider = ({ children }) => {
 
         // Toggle based on current state
         if (isPlaying) {
-            console.log('⏸️ Toggling to PAUSE');
             safePause();
         } else {
-            console.log('▶️ Toggling to PLAY');
             await safePlay();
         }
     };
@@ -564,17 +539,19 @@ export const PlayerProvider = ({ children }) => {
     return (
         <PlayerContext.Provider value={value}>
             {children}
-            
-            {/* ReactPlayer - YouTube iframe player (visually hidden) */}
+
+            {/* ReactPlayer - YouTube iframe player (hidden but DOM-visible to prevent throttling) */}
             {currentTrack?.playbackUrl && (
-                <div style={{ 
-                    position: 'fixed', 
-                    bottom: '-200px',
-                    left: '-400px', 
-                    width: '360px', 
-                    height: '200px',
+                <div style={{
+                    position: 'fixed',
+                    bottom: '0',
+                    right: '0',
+                    width: '1px',
+                    height: '1px',
+                    opacity: 0,
+                    overflow: 'hidden',
                     pointerEvents: 'none',
-                    zIndex: -1
+                    zIndex: -9999
                 }}>
                     <ReactPlayer
                         key={currentTrack.playbackUrl}
@@ -586,141 +563,10 @@ export const PlayerProvider = ({ children }) => {
                         loop={false}
                         controls={false}
                         playsinline
-                        width="360px"
-                        height="200px"
-                        onReady={() => {
-                            console.log('✅ ReactPlayer READY');
-                            isPlayerReady.current = true;
-                            setLoading(false);
-                            
-                            // Verify internal player and set initial volume
-                            if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
-                                try {
-                                    const internalPlayer = playerRef.current.getInternalPlayer();
-                                    
-                                    if (internalPlayer) {
-                                        // Unmute if muted
-                                        if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
-                                            internalPlayer.unMute();
-                                            console.log('🔊 Player unmuted');
-                                        }
-                                        
-                                        // Set initial volume
-                                        if (typeof internalPlayer.setVolume === 'function') {
-                                            const volumePercent = Math.round(volume * 100);
-                                            internalPlayer.setVolume(volumePercent);
-                                            console.log(`🔊 Volume set to ${volumePercent}%`);
-                                        }
-                                    }
-                                } catch (error) {
-                                    console.warn('Error setting initial player state:', error.message);
-                                }
-                            }
-                            
-                            // Get initial duration
-                            if (playerRef.current && typeof playerRef.current.getDuration === 'function') {
-                                try {
-                                    const dur = playerRef.current.getDuration();
-                                    if (dur) {
-                                        setDuration(dur);
-                                        console.log(`⏱️ Duration: ${dur}s`);
-                                    }
-                                } catch (error) {
-                                    // Duration will be obtained from onProgress
-                                }
-                            }
-                        }}
-                        onStart={() => {
-                            console.log('▶️ Playback STARTED');
-                            setLoading(false);
-                        }}
-                        onPlay={() => {
-                            console.log('▶️ ReactPlayer onPlay event');
-                            
-                            // CRITICAL: Unmute immediately when play starts
-                            if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
-                                try {
-                                    const internalPlayer = playerRef.current.getInternalPlayer();
-                                    if (internalPlayer) {
-                                        // Force unmute
-                                        if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
-                                            internalPlayer.unMute();
-                                            console.log('🔊 FORCE UNMUTED on play event');
-                                        }
-                                        
-                                        // Force volume
-                                        if (typeof internalPlayer.setVolume === 'function') {
-                                            internalPlayer.setVolume(100); // MAX VOLUME for testing
-                                            console.log('🔊 FORCE VOLUME 100%');
-                                        }
-                                        
-                                        // Check player state
-                                        if (typeof internalPlayer.getPlayerState === 'function') {
-                                            const state = internalPlayer.getPlayerState();
-                                            console.log('📊 YouTube Player State:', state);
-                                            // 1 = PLAYING, 2 = PAUSED, 3 = BUFFERING
-                                        }
-                                    }
-                                } catch (error) {
-                                    console.error('❌ Error in onPlay:', error);
-                                }
-                            }
-                            
-                            // Clear pending operations
-                            if (playPromiseRef.current) {
-                                playPromiseRef.current = null;
-                            }
-                            playAttempts.current = 0;
-                        }}
-                        onPause={() => {
-                            console.log('⏸️ ReactPlayer onPause event');
-                            // Clear pause flag when YouTube confirms pause
-                            isPausing.current = false;
-                        }}
-                        onProgress={(state) => {
-                            setCurrentTime(state.playedSeconds);
-                            
-                            // Update duration if not set
-                            if (!duration && state.loadedSeconds > 0 && playerRef.current && typeof playerRef.current.getDuration === 'function') {
-                                try {
-                                    const dur = playerRef.current.getDuration();
-                                    if (dur) setDuration(dur);
-                                } catch (error) {
-                                    // Silently fail, will retry in next progress event
-                                }
-                            }
-                            
-                            // Mark as ready when buffered
-                            if (state.loadedSeconds > 1 && loading) {
-                                setLoading(false);
-                            }
-                        }}
-                        onEnded={async () => {
-                            console.log('🏁 Track ENDED');
-                            // Clear refs and trigger next track
-                            playPromiseRef.current = null;
-                            isPausing.current = false;
-                            isPlayerReady.current = false;
-                            safePause();
-                            handleNextTrackRef.current?.();
-                        }}
-                        onError={async (error) => {
-                            // Ignore AbortError (expected during fast skips)
-                            if (error.name === 'AbortError') {
-                                console.log('⏸️ Play aborted (track skip)');
-                                return;
-                            }
-                            
-                            console.error('❌ ReactPlayer error:', error);
-                            setError('Error al reproducir');
-                            setLoading(false);
-                            isPlayerReady.current = false;
-                            safePause();
-                            
-                            // Skip to next track after error
-                            setTimeout(() => handleNextTrackRef.current?.(), 2000);
-                        }}
-                        progressInterval={100}
+                        pip={false}
+                        stopOnUnmount={false}
+                        width="100%"
+                        height="100%"
                         config={{
                             youtube: {
                                 playerVars: {
@@ -733,19 +579,125 @@ export const PlayerProvider = ({ children }) => {
                                     rel: 0,
                                     showinfo: 0,
                                     playsinline: 1,
-                                    enablejsapi: 1,
-                                    origin: window.location.origin
-                                },
-                                embedOptions: {
-                                    host: 'https://www.youtube-nocookie.com'
-                                }
-                            },
-                            file: {
-                                attributes: {
-                                    crossOrigin: 'anonymous'
+                                    enablejsapi: 1
                                 }
                             }
                         }}
+                        onDuration={(dur) => {
+                            if (dur && dur > 0) {
+                                setDuration(dur);
+                            }
+                        }}
+                        onReady={() => {
+                            isPlayerReady.current = true;
+                            setLoading(false);
+
+                            // Force unmute and set volume on ready
+                            if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
+                                try {
+                                    const internalPlayer = playerRef.current.getInternalPlayer();
+
+                                    if (internalPlayer) {
+                                        // Force unmute
+                                        if (typeof internalPlayer.unMute === 'function') {
+                                            internalPlayer.unMute();
+                                        }
+
+                                        // Set volume to max for testing
+                                        if (typeof internalPlayer.setVolume === 'function') {
+                                            internalPlayer.setVolume(100);
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.warn('Error in onReady:', error.message);
+                                }
+                            }
+                        }}
+                        onStart={() => {
+                            setLoading(false);
+                        }}
+                        onPlay={() => {
+                            // CRITICAL: Unmute immediately when play starts
+                            if (playerRef.current && typeof playerRef.current.getInternalPlayer === 'function') {
+                                try {
+                                    const internalPlayer = playerRef.current.getInternalPlayer();
+                                    if (internalPlayer) {
+                                        // Force unmute
+                                        if (typeof internalPlayer.isMuted === 'function' && internalPlayer.isMuted()) {
+                                            internalPlayer.unMute();
+                                        }
+
+                                        // Force volume
+                                        if (typeof internalPlayer.setVolume === 'function') {
+                                            internalPlayer.setVolume(100);
+                                        }
+
+                                        // Check player state
+                                        if (typeof internalPlayer.getPlayerState === 'function') {
+                                            // 1 = PLAYING, 2 = PAUSED, 3 = BUFFERING
+                                            internalPlayer.getPlayerState();
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('❌ Error in onPlay:', error);
+                                }
+                            }
+
+                            // Clear pending operations
+                            if (playPromiseRef.current) {
+                                playPromiseRef.current = null;
+                            }
+                            playAttempts.current = 0;
+                        }}
+                        onPause={() => {
+                            isPausing.current = false;
+                        }}
+                        onProgress={(state) => {
+                            setCurrentTime(state.playedSeconds);
+
+                            // Update duration if not set
+                            if (!duration && state.loadedSeconds > 0) {
+                                if (playerRef.current && typeof playerRef.current.getDuration === 'function') {
+                                    try {
+                                        const dur = playerRef.current.getDuration();
+                                        if (dur && dur > 0) {
+                                            setDuration(dur);
+                                        }
+                                    } catch (error) {
+                                        // Silently fail
+                                    }
+                                }
+                            }
+
+                            // Mark as ready when buffered
+                            if (state.loadedSeconds > 1 && loading) {
+                                setLoading(false);
+                            }
+                        }}
+                        onEnded={async () => {
+                            // Clear refs and trigger next track
+                            playPromiseRef.current = null;
+                            isPausing.current = false;
+                            isPlayerReady.current = false;
+                            safePause();
+                            handleNextTrackRef.current?.();
+                        }}
+                        onError={async (error) => {
+                            // Ignore AbortError (expected during fast skips)
+                            if (error.name === 'AbortError') {
+                                return;
+                            }
+
+                            console.error('❌ ReactPlayer error:', error);
+                            setError('Error al reproducir');
+                            setLoading(false);
+                            isPlayerReady.current = false;
+                            safePause();
+
+                            // Skip to next track after error
+                            setTimeout(() => handleNextTrackRef.current?.(), 2000);
+                        }}
+                        progressInterval={100}
                     />
                 </div>
             )}

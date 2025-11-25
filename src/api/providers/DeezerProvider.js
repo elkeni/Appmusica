@@ -25,7 +25,7 @@ class DeezerProvider {
                 // Usar CORS proxy para Deezer (CORS bloqueado en navegador)
                 const corsProxy = API_CONFIG.corsProxy || 'https://corsproxy.io/?';
                 const url = `${corsProxy}${encodeURIComponent(this.config.baseUrl + endpoint)}`;
-                
+
                 return await axios.get(url, {
                     params: {
                         ...params,
@@ -46,11 +46,11 @@ class DeezerProvider {
      */
     normalizeTrack(deezerTrack) {
         // Priorizar imágenes de alta resolución
-        const imageUrl = deezerTrack.album?.cover_xl || 
-                        deezerTrack.album?.cover_big || 
-                        deezerTrack.album?.cover_medium || 
-                        deezerTrack.album?.cover_small || 
-                        deezerTrack.album?.cover || '';
+        const imageUrl = deezerTrack.album?.cover_xl ||
+            deezerTrack.album?.cover_big ||
+            deezerTrack.album?.cover_medium ||
+            deezerTrack.album?.cover_small ||
+            deezerTrack.album?.cover || '';
 
         return {
             id: `deezer_${deezerTrack.id}`,
@@ -74,14 +74,13 @@ class DeezerProvider {
      * Buscar canciones en Deezer
      */
     async search(query, limit = 25) {
-        console.log(`🔍 [Deezer] Searching: "${query}"`);
 
         const data = await this.request('/search', {
             q: query,
             limit,
         });
 
-            const tracks = data.data?.map(track => this.normalizeTrack(track)) || [];
+        const tracks = data.data?.map(track => this.normalizeTrack(track)) || [];
         return tracks;
     }
 
@@ -89,14 +88,12 @@ class DeezerProvider {
      * Obtener chart (trending)
      */
     async getChart(limit = 50) {
-        console.log('📈 [Deezer] Getting chart');
 
         const data = await this.request('/chart', {
             limit,
         });
 
         const tracks = data.tracks?.data?.slice(0, limit).map(track => this.normalizeTrack(track)) || [];
-        console.log(`✅ [Deezer] Found ${tracks.length} chart tracks`);
         return tracks;
     }
 
@@ -104,10 +101,9 @@ class DeezerProvider {
      * Obtener detalles de un álbum
      */
     async getAlbum(albumId) {
-        console.log(`💿 [Deezer] Getting album: ${albumId}`);
-        
+
         const data = await this.request(`/album/${albumId}`);
-        
+
         return {
             id: `deezer_${data.id}`,
             title: data.title,
@@ -126,10 +122,9 @@ class DeezerProvider {
      * Obtener detalles de un artista
      */
     async getArtist(artistId) {
-        console.log(`👤 [Deezer] Getting artist: ${artistId}`);
-        
+
         const data = await this.request(`/artist/${artistId}`);
-        
+
         return {
             id: `deezer_${data.id}`,
             name: data.name,
@@ -145,14 +140,12 @@ class DeezerProvider {
      * Obtener top tracks de un artista
      */
     async getArtistTopTracks(artistId, limit = 10) {
-        console.log(`🎵 [Deezer] Getting top tracks for artist: ${artistId}`);
-        
+
         const data = await this.request(`/artist/${artistId}/top`, {
             limit,
         });
 
         const tracks = data.data?.map(track => this.normalizeTrack(track)) || [];
-        console.log(`✅ [Deezer] Found ${tracks.length} top tracks`);
         return tracks;
     }
 }

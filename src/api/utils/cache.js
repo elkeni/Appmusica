@@ -20,7 +20,7 @@ class CacheManager {
      */
     get(key) {
         const cached = this.cache.get(key);
-        
+
         if (!cached) {
             return null;
         }
@@ -31,7 +31,6 @@ class CacheManager {
             return null;
         }
 
-        console.log(`📦 Cache HIT: ${key.substring(0, 50)}...`);
         return cached.data;
     }
 
@@ -43,7 +42,6 @@ class CacheManager {
             data,
             expiration: Date.now() + ttl,
         });
-        console.log(`💾 Cache SET: ${key.substring(0, 50)}...`);
     }
 
     /**
@@ -51,17 +49,11 @@ class CacheManager {
      */
     cleanup() {
         const now = Date.now();
-        let cleaned = 0;
 
         for (const [key, value] of this.cache.entries()) {
             if (now > value.expiration) {
                 this.cache.delete(key);
-                cleaned++;
             }
-        }
-
-        if (cleaned > 0) {
-            console.log(`🧹 Cache cleanup: ${cleaned} entries removed`);
         }
     }
 
@@ -69,9 +61,7 @@ class CacheManager {
      * Limpiar todo el cache
      */
     clear() {
-        const size = this.cache.size;
         this.cache.clear();
-        console.log(`🗑️ Cache cleared: ${size} entries removed`);
     }
 
     /**

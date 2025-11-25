@@ -11,18 +11,6 @@ export function useMusic() {
     const [error, setError] = useState(null);
     const [configValid, setConfigValid] = useState(false);
 
-    // Validar configuración al montar
-    useEffect(() => {
-        const isValid = validateConfig();
-        setConfigValid(isValid);
-        
-        if (isValid) {
-            console.log('✅ Music API configured successfully');
-        } else {
-            console.warn('⚠️ Music API configuration incomplete');
-        }
-    }, []);
-
     /**
      * Buscar canciones
      */
@@ -215,20 +203,20 @@ export function useMusic() {
         loading,
         error,
         configValid,
-        
+
         // Métodos principales
         search,
         play,
         getTrending,
         getRecommendations,
         getNewReleases,
-        
+
         // Métodos de metadata
         getArtist,
         getArtistTopTracks,
         getAlbum,
         searchByType,
-        
+
         // Métodos avanzados
         getStreamUrl,
         validateProviders,

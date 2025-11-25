@@ -42,7 +42,7 @@ class ITunesProvider {
         const imageBig = itunesTrack.artworkUrl100
             ? itunesTrack.artworkUrl100.replace('100x100', '1000x1000')
             : itunesTrack.artworkUrl60?.replace('60x60', '1000x1000') || '';
-        
+
         const imageMedium = itunesTrack.artworkUrl100?.replace('100x100', '600x600') || imageBig;
         const imageUrl = imageBig || imageMedium;
 
@@ -68,7 +68,6 @@ class ITunesProvider {
      * Buscar canciones en iTunes
      */
     async search(query, limit = 25) {
-        console.log(`🔍 [iTunes] Searching: "${query}"`);
 
         const data = await this.request('/search', {
             term: query,
@@ -78,7 +77,6 @@ class ITunesProvider {
         });
 
         const tracks = data.results?.map(track => this.normalizeTrack(track)) || [];
-        console.log(`✅ [iTunes] Found ${tracks.length} tracks`);
         return tracks;
     }
 
@@ -86,7 +84,6 @@ class ITunesProvider {
      * Buscar álbumes
      */
     async searchAlbums(query, limit = 25) {
-        console.log(`🔍 [iTunes] Searching albums: "${query}"`);
 
         const data = await this.request('/search', {
             term: query,
@@ -107,7 +104,6 @@ class ITunesProvider {
             originalData: album,
         })) || [];
 
-        console.log(`✅ [iTunes] Found ${albums.length} albums`);
         return albums;
     }
 
@@ -115,7 +111,6 @@ class ITunesProvider {
      * Buscar artistas
      */
     async searchArtists(query, limit = 25) {
-        console.log(`🔍 [iTunes] Searching artists: "${query}"`);
 
         const data = await this.request('/search', {
             term: query,
@@ -134,7 +129,6 @@ class ITunesProvider {
             originalData: artist,
         })) || [];
 
-        console.log(`✅ [iTunes] Found ${artists.length} artists`);
         return artists;
     }
 
@@ -142,8 +136,7 @@ class ITunesProvider {
      * Obtener detalles de un álbum por ID
      */
     async getAlbum(albumId) {
-        console.log(`💿 [iTunes] Getting album: ${albumId}`);
-        
+
         const data = await this.request('/lookup', {
             id: albumId.replace('itunes_', ''),
             entity: 'song',
